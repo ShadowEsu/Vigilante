@@ -16,6 +16,7 @@ import { FaqSection } from "./components/FaqSection";
 import { LaunchCheckoutProvider } from "./context/LaunchCheckoutContext";
 import { fetchWaitlistCount } from "@/lib/waitlist/client";
 import { LegalFooterLinks } from "@/components/legal/LegalPage";
+import { clusterHref } from "@/lib/seo/content-cluster";
 
 export function LaunchPage() {
   return (
@@ -210,7 +211,10 @@ function LaunchPageInner() {
 
         <footer style={{ padding: "32px 28px 48px", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
           <nav style={{ textAlign: "center", marginBottom: 16, fontSize: 10, letterSpacing: "0.1em" }} aria-label="Footer">
-            <Link href="/competitive-intelligence" style={{ color: "rgba(255,255,255,0.35)", marginRight: 16, textDecoration: "none" }}>
+            <Link href={clusterHref("/resources")} style={{ color: "rgba(255,255,255,0.35)", marginRight: 16, textDecoration: "none" }}>
+              Resources
+            </Link>
+            <Link href={clusterHref("/competitive-intelligence")} style={{ color: "rgba(255,255,255,0.35)", marginRight: 16, textDecoration: "none" }}>
               CI Guide
             </Link>
             <Link href="/resources/competitive-intelligence-tools" style={{ color: "rgba(255,255,255,0.35)", marginRight: 16, textDecoration: "none" }}>

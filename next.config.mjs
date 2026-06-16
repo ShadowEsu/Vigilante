@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
-const isGithubPages = process.env.GITHUB_PAGES === "true";
+const isGithubPages =
+  process.env.GITHUB_PAGES === "true" && process.env.NODE_ENV !== "development";
 const repoBase = process.env.GITHUB_PAGES_BASE_PATH || "/Vigilante";
 const isDev = process.env.NODE_ENV === "development";
 

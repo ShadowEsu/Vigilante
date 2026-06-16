@@ -1,5 +1,7 @@
 # YC Vigilante — Website
 
+**Live site:** https://shadowesu.github.io/Vigilante/
+
 Launch site and waitlist for **Vigilante** competitive intelligence.
 
 This branch is for the **marketing site** (`/`), waitlist, pricing, and interactive terminal demo. The full product app lives on the `Vigilante` branch (same codebase — deploy either or both from one Vercel project).
@@ -24,13 +26,23 @@ Open http://localhost:3000
 
 ## Live waitlist setup
 
-**Required for production** — run once in Supabase SQL Editor:
+**Required for production** — run once in Supabase SQL Editor (in order):
 
 ```
 website/supabase/waitlist.sql
+website/supabase/waitlist-public-count.sql
 ```
 
-Vercel environment variables:
+**GitHub Pages** (auto-deploys from `YC_Vigilante-Website` branch) — add repo secrets:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+```
+
+The static site signs up directly via Supabase (anon insert + `waitlist_public_count` RPC).
+
+**Vercel** (full app + API routes) — environment variables:
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=
@@ -58,11 +70,19 @@ Without Supabase, signups save to `.data/waitlist.json` **local dev only**.
 
 ## Deploy
 
+**GitHub Pages (website):** push to `YC_Vigilante-Website` — workflow builds static export to https://shadowesu.github.io/Vigilante/
+
+```bash
+npm run build:github-pages   # local test (runs prepare → build → restore scripts)
+```
+
+**Vercel (full app):**
+
 ```bash
 npx vercel --prod
 ```
 
-Point your domain at the Vercel project. Waitlist goes live once Supabase env vars are set.
+Point your domain at the Vercel project. Waitlist on Vercel uses `/api/waitlist` once Supabase env vars are set.
 
 ## Files
 

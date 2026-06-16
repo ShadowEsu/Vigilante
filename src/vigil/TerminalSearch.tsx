@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchJson } from "./api";
+import { isStaticGithubPages, withBasePath } from "@/lib/paths";
 
 const AMBER = "#E3B341";
 const DIM = "rgba(255,255,255,0.45)";
@@ -41,6 +42,22 @@ const PROMPT = "vigilante@intel";
 
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
+}
+
+function mockDiscover(input: string): DiscoverResult {
+  const raw = input.trim().replace(/^https?:\/\//i, "").replace(/\/.*$/, "");
+  const domain = raw.includes(".") ? raw.toLowerCase() : `${raw.toLowerCase()}.com`;
+  const name = domain.split(".")[0].replace(/^\w/, (c) => c.toUpperCase());
+  return {
+    name,
+    domain,
+    sources: [
+      `https://${domain}/pricing`,
+      `https://${domain}/jobs`,
+      `https://${domain}/about`,
+      `https://${domain}/blog`,
+    ],
+  };
 }
 
 function shortSourceLabel(url: string) {
@@ -223,20 +240,27 @@ export function TerminalSearch({
     await typeLine("status", "resolving domain and mapping sources…");
 
     try {
-      const { ok, data } = await fetchJson<{
-        error?: string;
-        name: string;
-        domain: string;
-        sources?: string[];
-      }>("/api/companies/discover", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input: val }),
-      });
-      if (!ok) throw new Error(data.error ?? "Discovery failed");
-      setDiscovered({ name: data.name, domain: data.domain, sources: data.sources ?? [] });
-      await typeLine("status", `target: ${data.name} (${data.domain})`);
-      await typeLine("status", `${data.sources?.length ?? 0} URLs queued — pricing, careers, blog, investor`);
+      let discoveredResult: DiscoverResult;
+      if (isStaticGithubPages()) {
+        await sleep(400);
+        discoveredResult = mockDiscover(val);
+      } else {
+        const { ok, data } = await fetchJson<{
+          error?: string;
+          name: string;
+          domain: string;
+          sources?: string[];
+        }>(withBasePath("/api/companies/discover"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ input: val }),
+        });
+        if (!ok) throw new Error(data.error ?? "Discovery failed");
+        discoveredResult = { name: data.name, domain: data.domain, sources: data.sources ?? [] };
+      }
+      setDiscovered(discoveredResult);
+      await typeLine("status", `target: ${discoveredResult.name} (${discoveredResult.domain})`);
+      await typeLine("status", `${discoveredResult.sources.length} URLs queued — pricing, careers, blog, investor`);
       await typeLine("system", "confirm target? (yes/no)");
       setPhase("confirm");
     } catch (err) {

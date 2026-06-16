@@ -1,0 +1,62 @@
+name: Deploy website to GitHub Pages
+
+on:
+  push:
+    branches: [YC_Vigilante-Website]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Prepare static export
+        run: node scripts/prepare-github-pages.mjs
+
+      - name: Build static site
+        env:
+          GITHUB_PAGES: "true"
+          GITHUB_PAGES_BASE_PATH: /Vigilante
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SITE_URL: https://shadowesu.github.io/Vigilante
+        run: npm run build:github-pages
+
+      - name: Restore stashed routes
+        if: always()
+        run: node scripts/restore-github-pages.mjs
+
+      - name: Add .nojekyll
+        run: touch out/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -40,6 +40,14 @@ website/supabase/waitlist-public-count.sql
 
 View signups: [Supabase Table Editor → waitlist](https://supabase.com/dashboard/project/lshqzxgzehgmzgeilvmy/editor)
 
+## Magic link auth
+
+Configure Supabase redirect URLs — see `website/supabase/AUTH.md`:
+
+- Site URL: `https://shadowesu.github.io/Vigilante`
+- Redirect: `https://shadowesu.github.io/Vigilante/auth/callback`
+- Local: `http://localhost:3000/auth/callback`
+
 **Vercel** (full app + API routes) — environment variables:
 
 ```

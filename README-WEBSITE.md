@@ -33,14 +33,12 @@ website/supabase/waitlist.sql
 website/supabase/waitlist-public-count.sql
 ```
 
-**GitHub Pages** (auto-deploys from `YC_Vigilante-Website` branch) — add repo secrets:
+**GitHub Pages** (auto-deploys from `YC_Vigilante-Website` branch) — repo secrets already set:
 
-```
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-```
+- `NEXT_PUBLIC_SUPABASE_URL` → `https://lshqzxgzehgmzgeilvmy.supabase.co`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` → from Supabase dashboard
 
-The static site signs up directly via Supabase (anon insert + `waitlist_public_count` RPC).
+View signups: [Supabase Table Editor → waitlist](https://supabase.com/dashboard/project/lshqzxgzehgmzgeilvmy/editor)
 
 **Vercel** (full app + API routes) — environment variables:
 

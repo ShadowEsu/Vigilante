@@ -1,13 +1,18 @@
 import { NextResponse } from "next/server";
 import { quotePlan, type PlanTier } from "@/lib/billing/plans";
 import { isFoundingEligible, validatePromoCode } from "@/lib/billing/promo";
-import { createServiceClient } from "@/lib/supabase/admin";
+import {
+  createWaitlistClient,
+  getWaitlistSignupCount,
+  hasSupabaseConfig,
+} from "@/lib/supabase/waitlist";
 import { addWaitlistLocal, countWaitlistLocal } from "@/lib/waitlist/store";
 
 export const dynamic = "force-dynamic";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const VALID_PLANS: PlanTier[] = ["free", "growth", "team", "custom"];
+const DISPLAY_OFFSET = 412;
 
 const CORS_ORIGINS = [
   "https://shadowesu.github.io",
@@ -33,22 +38,9 @@ function jsonWithCors(request: Request, body: unknown, init?: ResponseInit) {
   });
 }
 
-function hasLiveSupabase() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
-  if (!url || !serviceKey) return false;
-  if (url.includes("placeholder") || serviceKey.includes("placeholder")) return false;
-  return true;
-}
-
 async function getSignupCount(): Promise<number> {
-  if (hasLiveSupabase()) {
-    const supabase = createServiceClient();
-    const { count, error } = await supabase
-      .from("waitlist")
-      .select("*", { count: "exact", head: true });
-    if (!error && count !== null) return count;
-  }
+  const supabaseCount = await getWaitlistSignupCount();
+  if (supabaseCount !== null) return supabaseCount;
   return countWaitlistLocal();
 }
 
@@ -58,10 +50,10 @@ export async function OPTIONS(request: Request) {
 
 export async function GET(request: Request) {
   try {
-    const local = await countWaitlistLocal();
-    return jsonWithCors(request, { count: local + 412 });
+    const count = await getSignupCount();
+    return jsonWithCors(request, { count: count + DISPLAY_OFFSET, storage: hasSupabaseConfig() ? "supabase" : "local" });
   } catch {
-    return jsonWithCors(request, { count: 412 });
+    return jsonWithCors(request, { count: DISPLAY_OFFSET });
   }
 }
 
@@ -107,12 +99,12 @@ export async function POST(request: Request) {
       foundingEligible,
     });
 
-    if (process.env.NODE_ENV === "production" && !hasLiveSupabase()) {
+    if (process.env.NODE_ENV === "production" && !hasSupabaseConfig()) {
       return jsonWithCors(
         request,
         {
           ok: false,
-          error: "Waitlist storage not configured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY on your host.",
+          error: "Waitlist not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.",
         },
         { status: 503 }
       );
@@ -130,8 +122,8 @@ export async function POST(request: Request) {
       due_monthly_usd: quote.dueMonthlyUsd,
     };
 
-    if (hasLiveSupabase()) {
-      const supabase = createServiceClient();
+    if (hasSupabaseConfig()) {
+      const supabase = createWaitlistClient();
       const { error } = await supabase.from("waitlist").insert(payload);
 
       if (error) {

@@ -1,8 +1,9 @@
 {
-  "name": "Vigilante — Competitive Intelligence",
+  "name": "Vigilante — AI Competitive Intelligence",
   "short_name": "Vigilante",
-  "description": "Competitive intelligence monitoring",
-  "start_url": "/app",
+  "description": "Monitor competitor pricing, SEC filings, and hiring with 3 AI agents. Daily diffs and sourced briefs.",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",

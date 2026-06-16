@@ -12,6 +12,7 @@ import { FeatureWalkthrough } from "./components/FeatureWalkthrough";
 import { LaunchMarquee } from "./components/LaunchMarquee";
 import { PricingSection } from "./components/PricingSection";
 import { LaunchGrid3d } from "./components/LaunchGrid3d";
+import { FaqSection } from "./components/FaqSection";
 import { LaunchCheckoutProvider } from "./context/LaunchCheckoutContext";
 import { fetchWaitlistCount } from "@/lib/waitlist/client";
 import { LegalFooterLinks } from "@/components/legal/LegalPage";
@@ -53,7 +54,8 @@ function LaunchPageInner() {
       <div className="launch-vignette" aria-hidden />
 
       <div className="launch-page-content">
-        <nav className={`launch-nav ${scrolled ? "launch-nav--scrolled" : ""}`}>
+        <header>
+        <nav className={`launch-nav ${scrolled ? "launch-nav--scrolled" : ""}`} aria-label="Primary">
           <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", color: "inherit" }}>
             <span style={{ width: 26, height: 26, border: "1px solid rgba(255,255,255,0.45)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 600 }}>V</span>
             <span style={{ fontSize: 13, letterSpacing: "0.22em", fontWeight: 600 }}>{LAUNCH.brand}</span>
@@ -62,12 +64,16 @@ function LaunchPageInner() {
             <a href="#product" style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>DEMO</a>
             <a href="#how" style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>HOW</a>
             <a href="#pricing" style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>PRICING</a>
+            <a href="#faq" style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>FAQ</a>
+            <Link href="/competitive-intelligence" style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>GUIDE</Link>
             <a href="#waitlist" style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>WAITLIST</a>
             <Link href="/auth" className="btn-ghost" style={{ textDecoration: "none" }}>[ SIGN IN ]</Link>
             <Link href="/preview" className="btn-primary" style={{ textDecoration: "none" }}>[ LIVE DEMO ]</Link>
           </div>
         </nav>
+        </header>
 
+        <main>
         <section
           ref={hero.ref}
           style={{ position: "relative", padding: "140px 28px 80px", maxWidth: 1100, margin: "0 auto" }}
@@ -150,6 +156,8 @@ function LaunchPageInner() {
 
         <PricingSection />
 
+        <FaqSection />
+
         <section
           id="accounts"
           ref={accounts.ref}
@@ -198,8 +206,20 @@ function LaunchPageInner() {
             </div>
           </div>
         </section>
+        </main>
 
         <footer style={{ padding: "32px 28px 48px", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+          <nav style={{ textAlign: "center", marginBottom: 16, fontSize: 10, letterSpacing: "0.1em" }} aria-label="Footer">
+            <Link href="/competitive-intelligence" style={{ color: "rgba(255,255,255,0.35)", marginRight: 16, textDecoration: "none" }}>
+              Competitive Intelligence Guide
+            </Link>
+            <Link href="/legal" style={{ color: "rgba(255,255,255,0.35)", marginRight: 16, textDecoration: "none" }}>
+              Legal
+            </Link>
+            <a href="https://github.com/ShadowEsu/Vigilante" rel="noopener noreferrer" style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>
+              GitHub
+            </a>
+          </nav>
           <LegalFooterLinks className="justify-center" />
           <p style={{ textAlign: "center", fontSize: 10, color: "rgba(255,255,255,0.22)", marginTop: 16, letterSpacing: "0.08em" }}>
             VIGILANTE — competitive intelligence

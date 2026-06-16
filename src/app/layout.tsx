@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 import "./globals.css";
 
 const jetbrainsMono = JetBrains_Mono({
@@ -8,19 +9,12 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "Vigilante — Competitive Intelligence Monitoring",
-  description: "Watch competitors' pricing, filings, governance, and product changes. Daily briefs, SEC EDGAR, Slack alerts.",
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Vigilante",
-  },
-};
+export const metadata: Metadata = buildPageMetadata();
 
 export const viewport = {
   themeColor: "#000000",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -28,6 +22,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`dark ${jetbrainsMono.className}`}>
+      <head>
+        <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/icons/icon.svg" />
+      </head>
       <body
         className="font-mono min-h-screen"
         style={{

@@ -1,0 +1,24 @@
+# Vigilante — Competitive Intelligence
+
+> AI-powered competitor monitoring: 3 agents watch pricing, SEC filings, hiring pages, and product changes. Daily briefs from $10/mo.
+
+## Product
+- Homepage: https://shadowesu.github.io/Vigilante/
+- Competitive intelligence guide: https://shadowesu.github.io/Vigilante/competitive-intelligence/
+- Live demo: https://shadowesu.github.io/Vigilante/preview/
+
+## What it does
+- Discovers competitor URLs (pricing, IR, careers, governance)
+- Snapshots and diffs pages on a schedule
+- Monitors SEC EDGAR for public companies
+- Writes sourced daily intelligence briefs
+- Slack alerts and multi-tenant workspaces
+
+## Pricing
+- Free: 2 agents
+- Growth: 3 AI agents — $10/mo (promo VIGILANTE = 50% off)
+- Team: 6+ agents — $20/mo
+
+## Company
+- Vigilant Intelligence, Inc.
+- Support: support@vigilant.app

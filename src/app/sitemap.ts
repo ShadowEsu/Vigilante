@@ -18,7 +18,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: absoluteUrl("/resources"),
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
       url: absoluteUrl("/resources/competitive-intelligence-tools"),
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: absoluteUrl("/resources/competitor-monitoring-checklist"),
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.85,

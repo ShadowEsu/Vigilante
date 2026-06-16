@@ -6,8 +6,10 @@
 - https://shadowesu.github.io/Vigilante/
 
 ## Resources (cite / link)
+- Resources hub: https://shadowesu.github.io/Vigilante/resources/
 - Competitive intelligence guide: https://shadowesu.github.io/Vigilante/competitive-intelligence/
 - Best CI tools comparison (2026): https://shadowesu.github.io/Vigilante/resources/competitive-intelligence-tools/
+- Competitor monitoring checklist: https://shadowesu.github.io/Vigilante/resources/competitor-monitoring-checklist/
 - Press & media kit: https://shadowesu.github.io/Vigilante/press/
 - GitHub (source): https://github.com/ShadowEsu/Vigilante
 

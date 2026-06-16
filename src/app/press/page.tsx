@@ -3,7 +3,8 @@ import { JsonLdScript } from "@/components/seo/JsonLdScript";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { absoluteUrl, getSiteUrl, SEO } from "@/lib/seo/site";
 import { organizationJsonLd } from "@/lib/seo/json-ld";
-import { withBasePath } from "@/lib/paths";
+import { TopicClusterBreadcrumb, TopicClusterRelated } from "@/components/seo/TopicClusterNav";
+import { clusterHref } from "@/lib/seo/content-cluster";
 
 export const metadata = buildPageMetadata({
   title: "Press & Media Kit",
@@ -38,11 +39,19 @@ export default function PressPage() {
       <JsonLdScript data={organizationJsonLd()} />
       <main className="min-h-screen font-mono" style={{ background: "#000", color: "rgba(255,255,255,0.9)", padding: "48px 24px 80px" }}>
         <article style={{ maxWidth: 720, margin: "0 auto" }}>
-          <Link href={withBasePath("/")} style={{ fontSize: 11, letterSpacing: "0.2em", color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>
+          <Link href={clusterHref("/")} style={{ fontSize: 11, letterSpacing: "0.2em", color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>
             ← VIGILANTE
           </Link>
 
-          <header style={{ margin: "32px 0 48px", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: 32 }}>
+          <TopicClusterBreadcrumb
+            crumbs={[
+              { label: "Home", href: "/" },
+              { label: "Resources", href: "/resources" },
+              { label: "Press kit" },
+            ]}
+          />
+
+          <header style={{ margin: "0 0 48px", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: 32 }}>
             <p style={{ fontSize: 10, letterSpacing: "0.18em", color: "rgba(255,255,255,0.35)" }}>PRESS & MEDIA</p>
             <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.4rem)", fontWeight: 600, margin: "12px 0" }}>Media kit</h1>
             <p style={{ fontSize: 14, lineHeight: 1.7, color: "rgba(255,255,255,0.55)" }}>
@@ -80,16 +89,16 @@ export default function PressPage() {
             </p>
             <div style={{ margin: "20px 0", padding: 24, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={withBasePath("/badge.svg")} alt="Vigilante badge" width={240} height={48} />
+              <img src={badgeUrl} alt="Vigilante badge" width={240} height={48} />
             </div>
             <p style={{ fontSize: 10, letterSpacing: "0.08em", color: "rgba(255,255,255,0.35)", marginBottom: 8 }}>EMBED CODE</p>
             <pre style={{ fontSize: 11, lineHeight: 1.5, padding: 16, overflow: "auto", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.55)" }}>
               {embedHtml}
             </pre>
             <p style={{ fontSize: 12, marginTop: 12 }}>
-              <a href={withBasePath("/icons/icon.svg")} style={{ color: "#6E9BE6" }}>Download SVG logo</a>
+              <a href={absoluteUrl("/icons/icon.svg")} style={{ color: "#6E9BE6" }}>Download SVG logo</a>
               {" · "}
-              <a href={withBasePath("/badge.svg")} style={{ color: "#6E9BE6" }}>Download badge</a>
+              <a href={badgeUrl} style={{ color: "#6E9BE6" }}>Download badge</a>
             </p>
           </section>
 
@@ -110,11 +119,11 @@ export default function PressPage() {
             </p>
           </section>
 
-          <nav style={{ fontSize: 11, color: "rgba(255,255,255,0.35)" }} aria-label="Related">
-            <Link href={withBasePath("/competitive-intelligence")} style={{ color: "rgba(255,255,255,0.5)", marginRight: 16 }}>CI Guide</Link>
-            <Link href={withBasePath("/resources/competitive-intelligence-tools")} style={{ color: "rgba(255,255,255,0.5)", marginRight: 16 }}>Tool comparison</Link>
-            <Link href="https://github.com/ShadowEsu/Vigilante" rel="noopener noreferrer" style={{ color: "rgba(255,255,255,0.5)" }}>GitHub</Link>
-          </nav>
+          <TopicClusterRelated currentPath="/press" />
+
+          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.28)", marginTop: 24 }}>
+            <Link href="https://github.com/ShadowEsu/Vigilante" rel="noopener noreferrer" style={{ color: "rgba(255,255,255,0.35)" }}>GitHub</Link>
+          </p>
         </article>
       </main>
     </>

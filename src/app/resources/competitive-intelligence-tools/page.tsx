@@ -3,7 +3,8 @@ import { JsonLdScript } from "@/components/seo/JsonLdScript";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { articleJsonLd } from "@/lib/seo/json-ld";
 import { getSiteUrl } from "@/lib/seo/site";
-import { withBasePath } from "@/lib/paths";
+import { TopicClusterBreadcrumb, TopicClusterRelated } from "@/components/seo/TopicClusterNav";
+import { clusterHref } from "@/lib/seo/content-cluster";
 
 export const metadata = buildPageMetadata({
   title: "Best Competitive Intelligence Tools (2026 Comparison)",
@@ -72,11 +73,19 @@ export default function CompetitiveIntelligenceToolsPage() {
       />
       <main className="min-h-screen font-mono" style={{ background: "#000", color: "rgba(255,255,255,0.9)", padding: "48px 24px 80px" }}>
         <article style={{ maxWidth: 760, margin: "0 auto" }}>
-          <Link href={withBasePath("/")} style={{ fontSize: 11, letterSpacing: "0.2em", color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>
+          <Link href={clusterHref("/")} style={{ fontSize: 11, letterSpacing: "0.2em", color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>
             ← VIGILANTE
           </Link>
 
-          <header style={{ margin: "32px 0 40px" }}>
+          <TopicClusterBreadcrumb
+            crumbs={[
+              { label: "Home", href: "/" },
+              { label: "Resources", href: "/resources" },
+              { label: "CI tools comparison" },
+            ]}
+          />
+
+          <header style={{ margin: "0 0 40px" }}>
             <p style={{ fontSize: 10, letterSpacing: "0.18em", color: "rgba(255,255,255,0.35)" }}>RESOURCES · 2026</p>
             <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.4rem)", fontWeight: 600, lineHeight: 1.2, margin: "12px 0" }}>
               Best competitive intelligence tools compared
@@ -128,13 +137,15 @@ export default function CompetitiveIntelligenceToolsPage() {
             <p style={{ fontSize: 14, lineHeight: 1.7, color: "rgba(255,255,255,0.55)", margin: "0 0 16px" }}>
               3 AI agents · $10/mo · 50% off with VIGILANTE. Join the waitlist or run the live demo.
             </p>
-            <Link href={withBasePath("/#waitlist")} className="btn-primary" style={{ textDecoration: "none", fontSize: 12, marginRight: 12 }}>
+            <Link href={clusterHref("/#waitlist")} className="btn-primary" style={{ textDecoration: "none", fontSize: 12, marginRight: 12 }}>
               [ JOIN WAITLIST ]
             </Link>
-            <Link href={withBasePath("/press")} style={{ fontSize: 12, color: "rgba(255,255,255,0.45)" }}>
+            <Link href={clusterHref("/press")} style={{ fontSize: 12, color: "rgba(255,255,255,0.45)" }}>
               Press kit →
             </Link>
           </section>
+
+          <TopicClusterRelated currentPath="/resources/competitive-intelligence-tools" />
 
           <p style={{ fontSize: 10, color: "rgba(255,255,255,0.28)", marginTop: 32, lineHeight: 1.6 }}>
             Cite this page: {getSiteUrl()}/resources/competitive-intelligence-tools — maintained by Vigilant Intelligence, Inc.

@@ -80,3 +80,29 @@ Use copy from [`/press`](../src/app/press/page.tsx) boilerplate.
 ## Custom domain (biggest upgrade)
 
 Move from `github.io/Vigilante` to `vigilant.app` — root domains accumulate authority faster than subpaths.
+
+## DR strategy mapped to Vigilante (2026)
+
+What actually moves Domain Rating — and what we already shipped on-site:
+
+| DR tactic | Vigilante implementation |
+|-----------|---------------------------|
+| **Quality backlinks from authority sites** | Manual: Product Hunt, HN, AlternativeTo (see above). On-site: `/press` embed badge + cite-friendly boilerplate |
+| **Link relevancy & diversity** | CI niche content only — guide, tools comparison, checklist. Mix editorial pages + GitHub README |
+| **Internal linking / topic clusters** | Pillar `/competitive-intelligence` → hub `/resources` → cluster pages. `TopicClusterNav` + breadcrumb JSON-LD on every resource page |
+| **Link-worthy content** | Checklist (citable framework), 2026 tools comparison, educational guide |
+| **Technical SEO** | Sitemap, robots, schema (FAQ, Article, Breadcrumb), Core Web Vitals via static export, HTTPS via GitHub Pages |
+| **Toxic link cleanup** | N/A for new domain — monitor GSC once indexed |
+
+### Anchor text to use in outreach
+
+- "competitive intelligence software" → `/competitive-intelligence`
+- "best competitive intelligence tools" → `/resources/competitive-intelligence-tools`
+- "competitor monitoring checklist" → `/resources/competitor-monitoring-checklist`
+- "Vigilante" / brand → homepage
+
+### DR expectations
+
+- DR 0–30: A handful of links from DR 50+ sites (PH, GitHub stars, one blog mention) can move the needle quickly
+- DR 30–50: Steady editorial links from SaaS/CI blogs; guest posts on niche sites
+- DR 50+: Requires sustained PR, partnerships, and custom domain — not achievable from GitHub Pages subpath alone

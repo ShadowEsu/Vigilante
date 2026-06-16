@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { JsonLdScript } from "@/components/seo/JsonLdScript";
+import { TopicClusterBreadcrumb, TopicClusterRelated } from "@/components/seo/TopicClusterNav";
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { articleJsonLd } from "@/lib/seo/json-ld";
+import { clusterHref } from "@/lib/seo/content-cluster";
 
 export const metadata = buildPageMetadata({
   title: "Competitive Intelligence Software — How AI Monitoring Works",
@@ -34,11 +36,11 @@ const sections = [
   },
   {
     title: "Who benefits from competitor intelligence tools?",
-    body: `Product managers tracking feature and pricing moves, corporate development teams evaluating markets, investors monitoring portfolio competition, and revenue teams arming sellers with timely battlecards all benefit from continuous monitoring instead of quarterly manual sweeps.`,
+    body: `Product managers tracking feature and pricing moves, corporate development teams evaluating markets, investors monitoring portfolio competition, and revenue teams arming sellers with timely battlecards all benefit from continuous monitoring instead of quarterly manual sweeps. Use our free competitor monitoring checklist to operationalize the workflow.`,
   },
   {
     title: "Vigilante pricing for CI teams",
-    body: `Vigilante offers a free tier for two monitoring agents, a Growth plan at $10/month for three AI agents with full competitor analysis, and Team plans for larger watchlists. Promo code VIGILANTE provides 50% off. Join the waitlist on the homepage for early access.`,
+    body: `Vigilante offers a free tier for two monitoring agents, a Growth plan at $10/month for three AI agents with full competitor analysis, and Team plans for larger watchlists. Promo code VIGILANTE provides 50% off. Compare tools in our competitive intelligence software roundup or join the waitlist on the homepage for early access.`,
   },
 ];
 
@@ -61,10 +63,16 @@ export default function CompetitiveIntelligencePage() {
       >
         <article style={{ maxWidth: 720, margin: "0 auto" }}>
           <header style={{ marginBottom: 48, borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: 32 }}>
-            <Link href="/" style={{ fontSize: 11, letterSpacing: "0.2em", color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>
+            <Link href={clusterHref("/")} style={{ fontSize: 11, letterSpacing: "0.2em", color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>
               ← VIGILANTE
             </Link>
-            <p style={{ fontSize: 10, letterSpacing: "0.18em", color: "rgba(255,255,255,0.35)", marginTop: 24 }}>
+            <TopicClusterBreadcrumb
+              crumbs={[
+                { label: "Home", href: "/" },
+                { label: "Competitive intelligence guide" },
+              ]}
+            />
+            <p style={{ fontSize: 10, letterSpacing: "0.18em", color: "rgba(255,255,255,0.35)", marginTop: 8 }}>
               COMPETITIVE INTELLIGENCE GUIDE
             </p>
             <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 600, lineHeight: 1.2, margin: "16px 0" }}>
@@ -94,21 +102,18 @@ export default function CompetitiveIntelligencePage() {
             <p style={{ fontSize: 14, lineHeight: 1.7, color: "rgba(255,255,255,0.55)", margin: "0 0 20px" }}>
               3 AI agents · $10/mo · 50% off with code VIGILANTE. Join the waitlist or run a live demo on any company.
             </p>
-            <Link href="/#waitlist" className="btn-primary" style={{ textDecoration: "none", fontSize: 12, marginRight: 12 }}>
+            <Link href={clusterHref("/#waitlist")} className="btn-primary" style={{ textDecoration: "none", fontSize: 12, marginRight: 12 }}>
               [ JOIN WAITLIST ]
             </Link>
-            <Link href="/preview" className="btn-ghost" style={{ textDecoration: "none", fontSize: 12 }}>
+            <Link href={clusterHref("/resources/competitor-monitoring-checklist")} className="btn-ghost" style={{ textDecoration: "none", fontSize: 12, marginRight: 12 }}>
+              [ CHECKLIST ]
+            </Link>
+            <Link href={clusterHref("/preview")} className="btn-ghost" style={{ textDecoration: "none", fontSize: 12 }}>
               [ LIVE DEMO ]
             </Link>
           </section>
 
-          <nav style={{ marginTop: 48, fontSize: 11, color: "rgba(255,255,255,0.35)" }} aria-label="Related">
-            <Link href="/" style={{ color: "rgba(255,255,255,0.5)", marginRight: 16 }}>Home</Link>
-            <Link href="/resources/competitive-intelligence-tools" style={{ color: "rgba(255,255,255,0.5)", marginRight: 16 }}>Tool comparison</Link>
-            <Link href="/press" style={{ color: "rgba(255,255,255,0.5)", marginRight: 16 }}>Press</Link>
-            <Link href="/legal/privacy" style={{ color: "rgba(255,255,255,0.5)", marginRight: 16 }}>Privacy</Link>
-            <Link href="/legal/terms" style={{ color: "rgba(255,255,255,0.5)" }}>Terms</Link>
-          </nav>
+          <TopicClusterRelated currentPath="/competitive-intelligence" />
         </article>
       </main>
     </>

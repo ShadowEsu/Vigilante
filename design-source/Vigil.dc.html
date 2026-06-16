@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}html,body{margin:0;padding:0;background:#000}::selection{background:rgba(255,255,255,.18)}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+  @keyframes chartDraw{to{stroke-dashoffset:0}}
+  @keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @keyframes scanBeat{0%,100%{opacity:.35}50%{opacity:1}}
+  @keyframes ringIn{from{stroke-dashoffset:var(--dash,100)}to{stroke-dashoffset:var(--end,0)}}
+  .scrollthin::-webkit-scrollbar{width:5px;height:5px}.scrollthin::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08)}.scrollthin::-webkit-scrollbar-track{background:transparent}
+  .scrollthin{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.08) transparent}
+  input::placeholder{color:rgba(255,255,255,.2)}
+</style>
+</helmet>
+
+<div style="height:100vh;width:100%;background:#000;color:rgba(255,255,255,.92);font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;display:grid;grid-template-columns:244px 1fr;overflow:hidden;">
+
+  <aside style="display:flex;flex-direction:column;min-height:0;border-right:1px solid rgba(255,255,255,.07);">
+    <div style="padding:20px 22px 18px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:12px;">
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border:1px solid rgba(255,255,255,.45);font-size:12px;font-weight:600;letter-spacing:0;">V</span>
+      <span style="font-size:14px;letter-spacing:.26em;color:rgba(255,255,255,.96);font-weight:600;">VIGIL</span>
+      <span style="margin-left:auto;font-size:9px;color:rgba(255,255,255,.28);letter-spacing:.1em;">v1.0</span>
+    </div>
+    <nav style="flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:1px;overflow:hidden;">
+      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="8">
+        <button onClick="{{ item.onClick }}" style="display:flex;align-items:center;gap:11px;padding:9px 12px;background:{{ item.bg }};border:none;border-left:{{ item.border }};font:inherit;cursor:pointer;color:{{ item.color }};text-align:left;width:100%;letter-spacing:0;" style-hover="background:rgba(255,255,255,.04)">
+          <span style="font-size:9px;color:rgba(255,255,255,.25);letter-spacing:.1em;flex-shrink:0;width:16px;">{{ item.idx }}</span>
+          <span style="flex:1;font-size:11.5px;letter-spacing:.13em;">{{ item.label }}</span>
+          <span style="font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.04em;">{{ item.hint }}</span>
+        </button>
+      </sc-for>
+    </nav>
+    <div style="padding:14px 20px 16px;border-top:1px solid rgba(255,255,255,.07);">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border:1px solid rgba(255,255,255,.28);font-size:11px;color:rgba(255,255,255,.75);flex-shrink:0;">JD</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;color:rgba(255,255,255,.82);">Jane Doe</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.32);letter-spacing:.05em;">Pro plan</div>
+        </div>
+        <button onClick="{{ goSettings }}" style="background:transparent;border:none;padding:4px 5px;font:inherit;font-size:15px;color:rgba(255,255,255,.32);cursor:pointer;line-height:1;" style-hover="color:rgba(255,255,255,.85)">⚙</button>
+      </div>
+      <div style="font-size:9px;color:rgba(255,255,255,.2);letter-spacing:.1em;margin-top:9px;">◆ PREVIEW MODE · mock data</div>
+    </div>
+  </aside>
+
+  <div style="display:grid;grid-template-rows:auto 1fr;min-width:0;min-height:0;overflow:hidden;">
+    <header style="height:44px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:14px;padding:0 22px;font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.06em;">
+      <span style="display:flex;align-items:center;gap:7px;color:rgba(255,255,255,.85);flex-shrink:0;"><span style="font-size:8px;animation:pulse 2.4s infinite;">●</span>LIVE DEMO</span>
+      <span style="color:rgba(255,255,255,.12);">|</span>
+      <span style="flex-shrink:0;">WATCHES <span style="color:rgba(255,255,255,.88);">{{ animWatches }}</span></span>
+      <span style="flex-shrink:0;">SIGNALS <span style="color:rgba(255,255,255,.88);">{{ animSignals }}</span></span>
+      <span style="flex-shrink:0;">SPEND <span style="color:rgba(255,255,255,.88);">{{ animSpend }}</span>/$5.00</span>
+      <span style="margin-left:auto;font-variant-numeric:tabular-nums;color:rgba(255,255,255,.55);flex-shrink:0;">{{ clock }} UTC</span>
+      <button style="background:transparent;border:1px solid rgba(255,255,255,.14);padding:4px 12px;font:inherit;font-size:10px;letter-spacing:.08em;color:rgba(255,255,255,.5);cursor:pointer;flex-shrink:0;" style-hover="border-color:rgba(255,255,255,.4);color:rgba(255,255,255,.9)">[ connect supabase ]</button>
+    </header>
+
+    <main style="min-height:0;min-width:0;overflow:hidden;position:relative;">
+
+      <!-- ══════════════ OVERVIEW ══════════════ -->
+      <sc-if value="{{ isOverview }}" hint-placeholder-val="{{ true }}">
+      <div style="height:100%;display:flex;flex-direction:column;">
+        <div style="height:46px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;padding:0 22px;font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.06em;flex-shrink:0;overflow:hidden;flex-wrap:nowrap;white-space:nowrap;gap:0;">
+          <span style="margin-right:14px;flex-shrink:0;">WATCHES <span style="color:rgba(255,255,255,.88);">{{ animWatches }}</span></span>
+          <span style="color:rgba(255,255,255,.1);margin-right:14px;">|</span>
+          <span style="margin-right:14px;flex-shrink:0;">LIVE <span style="color:rgba(255,255,255,.88);">{{ animLive }}</span></span>
+          <span style="color:rgba(255,255,255,.1);margin-right:14px;">|</span>
+          <span style="margin-right:14px;flex-shrink:0;">SIGNALS <span style="color:rgba(255,255,255,.88);">{{ animSignals }}</span></span>
+          <span style="color:rgba(255,255,255,.1);margin-right:14px;">|</span>
+          <span style="margin-right:14px;flex-shrink:0;">HIGH △ <span style="color:rgba(255,255,255,.88);">3</span></span>
+          <span style="color:rgba(255,255,255,.1);margin-right:14px;">|</span>
+          <span style="margin-right:14px;flex-shrink:0;">SPEND <span style="color:rgba(255,255,255,.88);">{{ animSpend }}</span>/$5.00</span>
+          <span style="color:rgba(255,255,255,.1);margin-right:14px;">|</span>
+          <span style="flex-shrink:0;">LAST SCAN <span style="color:rgba(255,255,255,.88);">2m ago</span></span>
+          <span style="flex:1;"></span>
+          <button onClick="{{ toggleConfigure }}" style="background:transparent;border:1px solid rgba(255,255,255,.16);padding:5px 12px;font:inherit;font-size:10px;letter-spacing:.1em;color:rgba(255,255,255,.65);cursor:pointer;flex-shrink:0;" style-hover="border-color:rgba(255,255,255,.4);color:rgba(255,255,255,.95)">[ ⊞ CONFIGURE ]</button>
+        </div>
+
+        <div style="flex:1;position:relative;overflow:hidden;">
+          <sc-if value="{{ configuring }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;z-index:10;background:rgba(0,0,0,.96);overflow:auto;">
+            <div style="padding:36px;max-width:920px;">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;"><span style="font-size:11px;color:rgba(255,255,255,.6);letter-spacing:.22em;font-weight:500;">CONFIGURE DASHBOARD</span><span style="flex:1;height:1px;background:rgba(255,255,255,.07);"></span><button onClick="{{ toggleConfigure }}" style="background:transparent;border:1px solid rgba(255,255,255,.18);padding:5px 14px;font:inherit;font-size:10px;letter-spacing:.1em;color:rgba(255,255,255,.65);cursor:pointer;" style-hover="color:rgba(255,255,255,.95)">[ × DONE ]</button></div>
+              <div style="font-size:11px;color:rgba(255,255,255,.32);letter-spacing:.06em;margin-bottom:26px;">select which panels appear on your overview</div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+                <sc-for list="{{ widgetCards }}" as="c" hint-placeholder-count="8">
+                  <button onClick="{{ c.onClick }}" style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.1);padding:18px 18px;font:inherit;cursor:pointer;text-align:left;width:100%;color:{{ c.color }};" style-hover="border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.04)">
+                    <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px;"><span style="font-size:12px;">{{ c.glyph }}</span><span style="font-size:11px;letter-spacing:.13em;font-weight:500;">{{ c.label }}</span></div>
+                    <div style="font-size:10px;color:rgba(255,255,255,.28);line-height:1.55;">{{ c.desc }}</div>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+          </sc-if>
+
+          <div class="scrollthin" style="display:grid;grid-template-columns:1fr 1fr;height:100%;overflow:auto;align-content:start;">
+
+            <!-- 01 ANALYTICS -->
+            <div style="display:{{ wdAnalytics }};border-right:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);padding:24px 28px;overflow:auto;">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;"><span style="font-size:10px;color:rgba(255,255,255,.22);letter-spacing:.15em;">01</span><span style="font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.22em;font-weight:500;">ANALYTICS</span><span style="flex:1;height:1px;background:rgba(255,255,255,.07);"></span></div>
+              <div style="display:flex;gap:0;margin:22px 0 24px;border:1px solid rgba(255,255,255,.07);">
+                <div style="flex:1;padding:16px 20px;border-right:1px solid rgba(255,255,255,.07);">
+                  <div style="font-size:38px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums;color:rgba(255,255,255,.96);letter-spacing:-.02em;">{{ animWatches }}<span style="font-size:22px;color:rgba(255,255,255,.22);font-weight:400;">/3</span></div>
+                  <div style="font-size:9px;letter-spacing:.2em;color:rgba(255,255,255,.38);margin-top:10px;text-transform:uppercase;">LIVE</div>
+                </div>
+                <div style="flex:1;padding:16px 20px;border-right:1px solid rgba(255,255,255,.07);">
+                  <div style="font-size:38px;font-weight:600;line-height:1;color:rgba(255,255,255,.96);font-variant-numeric:tabular-nums;letter-spacing:-.02em;">{{ animSignals }}</div>
+                  <div style="font-size:9px;letter-spacing:.2em;color:rgba(255,255,255,.38);margin-top:10px;">SIGNALS</div>
+                </div>
+                <div style="flex:1;padding:16px 20px;">
+                  <div style="font-size:38px;font-weight:600;line-height:1;color:rgba(255,255,255,.96);font-variant-numeric:tabular-nums;letter-spacing:-.02em;">{{ animSpend }}</div>
+                  <div style="font-size:9px;letter-spacing:.2em;color:rgba(255,255,255,.38);margin-top:10px;">MTD SPEND</div>
+                </div>
+              </div>
+              <div style="font-size:9.5px;letter-spacing:.16em;color:rgba(255,255,255,.38);margin-bottom:10px;">14-DAY ACTIVITY</div>
+              {{ activityChart }}
+              <div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:8px;letter-spacing:.06em;display:flex;gap:14px;">
+                <span>peak 8</span><span>avg 3.2</span><span>trend ↑</span>
+              </div>
+              <div style="font-size:9.5px;letter-spacing:.16em;color:rgba(255,255,255,.38);margin:22px 0 12px;">BY TYPE</div>
+              <div style="display:flex;flex-direction:column;gap:7px;">
+                <sc-for list="{{ typeBars }}" as="t" hint-placeholder-count="7">
+                  <div style="display:flex;align-items:center;gap:10px;font-size:12px;"><span style="width:80px;color:{{ t.color }};letter-spacing:.07em;">{{ t.label }}</span><span style="letter-spacing:1px;"><span style="color:rgba(255,255,255,.58);">{{ t.fill }}</span><span style="color:rgba(255,255,255,.1);">{{ t.track }}</span></span><span style="color:rgba(255,255,255,.45);margin-left:auto;font-variant-numeric:tabular-nums;">{{ t.count }}</span></div>
+                </sc-for>
+              </div>
+            </div>
+
+            <!-- 02 WATCHLISTS -->
+            <div style="display:{{ wdWatchlists }};border-bottom:1px solid rgba(255,255,255,.07);padding:24px 28px;overflow:auto;">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;"><span style="font-size:10px;color:rgba(255,255,255,.22);letter-spacing:.15em;">02</span><span style="font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.22em;font-weight:500;">WATCHLISTS</span><span style="flex:1;height:1px;background:rgba(255,255,255,.07);"></span><span style="font-size:10px;color:rgba(255,255,255,.38);letter-spacing:.1em;">2 LIVE</span></div>
+              <sc-for list="{{ watchlists }}" as="w" hint-placeholder-count="3">
+                <div style="padding:16px 0;border-bottom:1px solid rgba(255,255,255,.05);">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="font-size:{{ w.glyphSize }};color:{{ w.glyphColor }};flex-shrink:0;animation:{{ w.glyphAnim }};">{{ w.glyph }}</span>
+                    <span style="flex:1;color:rgba(255,255,255,.9);letter-spacing:.03em;font-size:12.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ w.name }}</span>
+                    <span style="font-size:10px;letter-spacing:.12em;color:{{ w.statusColor }};flex-shrink:0;">{{ w.status }}</span>
+                    <button onClick="{{ w.onRun }}" style="background:transparent;border:none;padding:0 0 0 10px;font:inherit;cursor:pointer;font-size:11px;color:{{ w.runColor }};flex-shrink:0;letter-spacing:.06em;" style-hover="color:rgba(255,255,255,.95)">{{ w.runLabel }}</button>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px;margin-top:8px;padding-left:18px;font-size:11px;color:rgba(255,255,255,.32);">
+                    <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ w.kind }} · {{ w.target }}</span>
+                    <span style="letter-spacing:1px;flex-shrink:0;"><span style="color:rgba(255,255,255,.48);">{{ w.fill }}</span><span style="color:rgba(255,255,255,.1);">{{ w.track }}</span></span>
+                    <span style="flex-shrink:0;font-variant-numeric:tabular-nums;">{{ w.spendStr }}/{{ w.budgetStr }}</span>
+                  </div>
+                  <sc-if value="{{ w.scanning }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:8px 0 0 18px;font-size:10.5px;color:rgba(255,255,255,.5);letter-spacing:.06em;animation:scanBeat 1.2s infinite;">SCANNING ── running first signal detection</div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+
+            <!-- 03 SIGNALS -->
+            <div style="display:{{ wdSignals }};border-right:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);padding:24px 28px;overflow:auto;">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;"><span style="font-size:10px;color:rgba(255,255,255,.22);letter-spacing:.15em;">03</span><span style="font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.22em;font-weight:500;">SIGNALS</span><span style="flex:1;height:1px;background:rgba(255,255,255,.07);"></span><span style="font-size:10px;color:rgba(255,255,255,.38);letter-spacing:.1em;">{{ animSignals }} NEW</span></div>
+              <sc-for list="{{ signalsTop }}" as="s" hint-placeholder-count="5">
+                <div style="display:flex;gap:12px;padding:13px 0 13px 12px;border-bottom:1px solid rgba(255,255,255,.05);box-shadow:{{ s.leftBorder }};animation:slideIn .25s ease both;animation-delay:{{ s.animDelay }};">
+                  <span style="font-size:11px;color:{{ s.sevColor }};width:10px;text-align:center;padding-top:1px;flex-shrink:0;">{{ s.sev }}</span>
+                  <div style="flex:1;min-width:0;">
+                    <div style="color:rgba(255,255,255,.92);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ s.title }}</div>
+                    <div style="font-size:10.5px;margin-top:4px;letter-spacing:.06em;"><span style="color:{{ s.color }};">{{ s.typeLabel }}</span><span style="color:rgba(255,255,255,.3);"> · {{ s.source }} · {{ s.time }}</span></div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+
+            <!-- 04 BRIEF -->
+            <div style="display:{{ wdBrief }};border-bottom:1px solid rgba(255,255,255,.07);padding:24px 28px;overflow:auto;">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;"><span style="font-size:10px;color:rgba(255,255,255,.22);letter-spacing:.15em;">04</span><span style="font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.22em;font-weight:500;">BRIEF</span><span style="flex:1;height:1px;background:rgba(255,255,255,.07);"></span></div>
+              <div style="font-size:9.5px;color:rgba(255,255,255,.28);letter-spacing:.16em;margin:18px 0 12px;">INTELLIGENCE BRIEF · REF #0047</div>
+              <div style="font-size:14.5px;font-weight:600;color:rgba(255,255,255,.96);letter-spacing:.02em;margin-bottom:12px;line-height:1.35;">{{ brief.title }}</div>
+              <div style="height:1px;background:rgba(255,255,255,.07);margin-bottom:14px;"></div>
+              <p style="font-size:12.5px;line-height:1.82;color:rgba(255,255,255,.58);max-width:54ch;margin:0 0 14px;">{{ brief.body }}</p>
+              <div style="height:1px;background:rgba(255,255,255,.07);margin-bottom:14px;"></div>
+              <div style="display:flex;align-items:center;gap:18px;font-size:10.5px;color:rgba(255,255,255,.38);letter-spacing:.05em;">
+                <span>[ {{ brief.sources }} SOURCES ]</span>
+                <span style="display:flex;align-items:center;gap:8px;">CONFIDENCE <span style="letter-spacing:1px;"><span style="color:rgba(255,255,255,.62);">{{ confFill }}</span><span style="color:rgba(255,255,255,.1);">{{ confTrack }}</span></span> {{ brief.confidence }}%</span>
+              </div>
+              <div style="font-size:9.5px;color:rgba(255,255,255,.22);letter-spacing:.1em;margin-top:8px;">VIGIL INTEL · {{ brief.date }} {{ brief.time }} UTC</div>
+            </div>
+
+            <!-- 05 LIVE TICKERS -->
+            <div style="display:{{ wdStock }};grid-column:1/-1;border-bottom:1px solid rgba(255,255,255,.07);padding:16px 28px;">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;"><span style="font-size:10px;color:rgba(255,255,255,.22);letter-spacing:.15em;">05</span><span style="font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.22em;font-weight:500;">LIVE TICKERS</span><span style="flex:1;height:1px;background:rgba(255,255,255,.07);"></span><span style="font-size:10px;color:rgba(255,255,255,.32);letter-spacing:.1em;">3 TRACKED</span></div>
+              <div style="display:flex;gap:0;">
+                <sc-for list="{{ stocks }}" as="s" hint-placeholder-count="3">
+                  <div style="flex:1;display:flex;align-items:center;gap:12px;padding:0 20px 0 0;margin-right:20px;border-right:{{ s.borderRight }};min-width:0;">
+                    <span style="font-size:13px;font-weight:700;letter-spacing:.08em;color:rgba(255,255,255,.96);flex-shrink:0;">{{ s.ticker }}</span>
+                    <span style="font-size:14px;font-weight:500;font-variant-numeric:tabular-nums;flex-shrink:0;">${{ s.price }}</span>
+                    <span style="font-size:12px;font-variant-numeric:tabular-nums;color:{{ s.chgColor }};flex-shrink:0;font-weight:500;">{{ s.dir }} {{ s.chg }}</span>
+                    <span style="font-size:19px;letter-spacing:2px;color:rgba(255,255,255,.38);flex-shrink:0;">{{ s.spark }}</span>
+                    <span style="font-size:11px;color:rgba(255,255,255,.3);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ s.note }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <!-- 06 NEWSLETTERS -->
+            <div style="display:{{ wdNewsletters }};border-right:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);padding:24px 28px;overflow:auto;">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;"><span style="font-size:10px;color:rgba(255,255,255,.22);letter-spacing:.15em;">06</span><span style="font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.22em;font-weight:500;">NEWSLETTERS</span><span style="flex:1;height:1px;background:rgba(255,255,255,.07);"></span></div>
+              <sc-for list="{{ newslettersTop }}" as="n" hint-placeholder-count="2">
+                <div style="padding:14px 0;border-bottom:1px solid rgba(255,255,255,.05);animation:fadeUp .3s ease both;animation-delay:{{ n.animDelay }};">
+                  <div style="display:flex;gap:10px;align-items:baseline;margin-bottom:5px;"><span style="flex:1;color:rgba(255,255,255,.88);font-size:12.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ n.name }}</span><span style="font-size:10px;color:rgba(255,255,255,.3);flex-shrink:0;">{{ n.received }}</span></div>
+                  <div style="font-size:11.5px;color:rgba(255,255,255,.5);margin-bottom:7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ n.subject }}</div>
+                  <div style="font-size:10px;color:rgba(255,255,255,.32);letter-spacing:.04em;">+ {{ n.change0 }} · + {{ n.change1 }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <!-- 07 PATENTS -->
+            <div style="display:{{ wdPatents }};border-bottom:1px solid rgba(255,255,255,.07);padding:24px 28px;overflow:auto;">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;"><span style="font-size:10px;color:rgba(255,255,255,.22);letter-spacing:.15em;">07</span><span style="font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.22em;font-weight:500;">PATENTS</span><span style="flex:1;height:1px;background:rgba(255,255,255,.07);"></span></div>
+              <sc-for list="{{ patentsTop }}" as="p" hint-placeholder-count="2">
+                <div style="padding:14px 0;border-bottom:1px solid rgba(255,255,255,.05);">
+                  <div style="display:flex;gap:10px;align-items:flex-start;"><span style="color:rgba(255,255,255,.28);font-size:11px;padding-top:1px;flex-shrink:0;">■</span><div style="flex:1;min-width:0;"><div style="color:rgba(255,255,255,.88);font-size:12px;line-height:1.45;">{{ p.title }}</div><div style="font-size:10px;color:rgba(255,255,255,.38);margin-top:5px;letter-spacing:.04em;">{{ p.company }} · {{ p.filed }} · {{ p.claims }} claims</div></div></div>
+                </div>
+              </sc-for>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ══════════════ ANALYTICS ══════════════ -->
+      <sc-if value="{{ isAnalytics }}" hint-placeholder-val="{{ false }}">
+      <div class="scrollthin" style="height:100%;overflow:auto;padding:28px 36px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:26px;"><span style="font-size:10px;color:rgba(255,255,255,.22);letter-spacing:.15em;">02</span><span style="font-size:11px;color:rgba(255,255,255,.6);letter-spacing:.22em;font-weight:500;">ANALYTICS</span><span style="flex:1;height:1px;background:rgba(255,255,255,.07);"></span><span style="font-size:10px;color:rgba(255,255,255,.32);letter-spacing:.1em;">14-DAY WINDOW</span></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);border:1px solid rgba(255,255,255,.07);margin-bottom:32px;">
+          <div style="padding:22px 24px;border-right:1px solid rgba(255,255,255,.07);"><div style="font-size:34px;font-weight:600;color:rgba(255,255,255,.96);line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em;">{{ animWatches }}<span style="font-size:20px;color:rgba(255,255,255,.22);font-weight:400;">/3</span></div><div style="font-size:9px;letter-spacing:.2em;color:rgba(255,255,255,.38);margin-top:11px;">WATCHES LIVE</div></div>
+          <div style="padding:22px 24px;border-right:1px solid rgba(255,255,255,.07);"><div style="font-size:34px;font-weight:600;color:rgba(255,255,255,.96);line-height:1;letter-spacing:-.02em;">{{ animSignals }}</div><div style="font-size:9px;letter-spacing:.2em;color:rgba(255,255,255,.38);margin-top:11px;">SIGNALS DETECTED</div></div>
+          <div style="padding:22px 24px;border-right:1px solid rgba(255,255,255,.07);"><div style="font-size:34px;font-weight:600;color:rgba(255,255,255,.96);line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em;">{{ animSpend }}</div><div style="font-size:9px;letter-spacing:.2em;color:rgba(255,255,255,.38);margin-top:11px;">SPEND MTD</div></div>
+          <div style="padding:22px 24px;"><div style="font-size:34px;font-weight:600;color:rgba(255,255,255,.96);line-height:1;">1.1s</div><div style="font-size:9px;letter-spacing:.2em;color:rgba(255,255,255,.38);margin-top:11px;">AVG SCAN TIME</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:36px;margin-bottom:34px;">
+          <div>
+            <div style="font-size:9.5px;letter-spacing:.18em;color:rgba(255,255,255,.38);margin-bottom:14px;">14-DAY SIGNAL VELOCITY</div>
+            {{ activityChartLg }}
+            <div style="display:flex;flex-direction:column;gap:5px;margin-top:16px;">
+              <sc-for list="{{ activityRows }}" as="r" hint-placeholder-count="14">
+                <div style="display:flex;align-items:center;gap:12px;font-size:11.5px;"><span style="width:44px;color:rgba(255,255,255,.38);font-size:10.5px;flex-shrink:0;">{{ r.day }}</span><span style="letter-spacing:1px;"><span style="color:rgba(255,255,255,.55);">{{ r.fill }}</span><span style="color:rgba(255,255,255,.1);">{{ r.track }}</span></span><span style="color:rgba(255,255,255,.45);font-variant-numeric:tabular-nums;min-width:16px;text-align:right;">{{ r.count }}</span></div>
+              </sc-for>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:9.5px;letter-spacing:.18em;color:rgba(255,255,255,.38);margin-bottom:14px;">BY SIGNAL TYPE</div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:30px;">
+              <sc-for list="{{ typeBars }}" as="t" hint-placeholder-count="7">
+                <div style="display:flex;align-items:center;gap:12px;font-size:12px;"><span style="width:86px;color:{{ t.color }};letter-spacing:.07em;">{{ t.label }}</span><span style="letter-spacing:1px;"><span style="color:rgba(255,255,255,.58);">{{ t.fill }}</span><span style="color:rgba(255,255,255,.1);">{{ t.track }}</span></span><span style="color:rgba(255,255,255,.45);margin-left:auto;font-variant-numeric:tabular-nums;">{{ t.count }}</span></div>
+              </sc-for>
+            </div>
+            <div style="font-size:9.5px;letter-spacing:.18em;color:rgba(255,255,255,.38);margin-bottom:14px;">SCAN BUDGET UTILIZATION</div>
+            <sc-for list="{{ watchlists }}" as="w" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;font-size:12px;">
+                <span style="font-size:8px;color:{{ w.glyphColor }};flex-shrink:0;">{{ w.glyph }}</span>
+                <span style="flex:1;min-width:0;color:rgba(255,255,255,.75);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;">{{ w.name }}</span>
+                <span style="letter-spacing:1px;flex-shrink:0;"><span style="color:rgba(255,255,255,.52);">{{ w.fill }}</span><span style="color:rgba(255,255,255,.1);">{{ w.track }}</span></span>
+                <span style="color:rgba(255,255,255,.45);flex-shrink:0;font-variant-numeric:tabular-nums;min-width:28px;text-align:right;">{{ w.pct }}%</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="font-size:9.5px;letter-spacing:.18em;color:rgba(255,255,255,.38);margin-bottom:14px;">BY WATCH</div>
+        <div style="border:1px solid rgba(255,255,255,.07);margin-bottom:32px;">
+          <div style="display:grid;grid-template-columns:minmax(180px,2fr) 80px 100px 100px 96px 100px;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.07);font-size:9.5px;letter-spacing:.16em;color:rgba(255,255,255,.32);"><span>WATCH</span><span>SIGNALS</span><span>SPEND</span><span>BUDGET</span><span>CADENCE</span><span>LAST RUN</span></div>
+          <sc-for list="{{ watchlists }}" as="w" hint-placeholder-count="3">
+            <div style="display:grid;grid-template-columns:minmax(180px,2fr) 80px 100px 100px 96px 100px;align-items:center;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px;" style-hover="background:rgba(255,255,255,.02)"><span style="display:flex;align-items:center;gap:8px;min-width:0;"><span style="font-size:8px;color:{{ w.glyphColor }};flex-shrink:0;">{{ w.glyph }}</span><span style="color:rgba(255,255,255,.88);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ w.name }}</span></span><span style="color:rgba(255,255,255,.58);font-variant-numeric:tabular-nums;">{{ w.signals }}</span><span style="color:rgba(255,255,255,.58);font-variant-numeric:tabular-nums;">{{ w.spendStr }}</span><span style="color:rgba(255,255,255,.58);font-variant-numeric:tabular-nums;">{{ w.budgetStr }}</span><span style="color:rgba(255,255,255,.58);">{{ w.cadence }}</span><span style="color:rgba(255,255,255,.35);">2m ago</span></div>
+          </sc-for>
+        </div>
+        <div style="font-size:9.5px;letter-spacing:.18em;color:rgba(255,255,255,.38);margin-bottom:14px;">SCAN LOG</div>
+        <div style="border:1px solid rgba(255,255,255,.07);">
+          <div style="display:grid;grid-template-columns:130px minmax(160px,1.6fr) 80px 90px 70px;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.07);font-size:9.5px;letter-spacing:.16em;color:rgba(255,255,255,.32);"><span>DATE</span><span>WATCH</span><span>SIGNALS</span><span>DURATION</span><span>COST</span></div>
+          <sc-for list="{{ scanLog }}" as="r" hint-placeholder-count="8">
+            <div style="display:grid;grid-template-columns:130px minmax(160px,1.6fr) 80px 90px 70px;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px;font-variant-numeric:tabular-nums;" style-hover="background:rgba(255,255,255,.02)"><span style="color:rgba(255,255,255,.38);font-size:11px;">{{ r.date }} {{ r.time }}</span><span style="color:rgba(255,255,255,.78);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.watch }}</span><span style="color:rgba(255,255,255,.55);">{{ r.signals }}</span><span style="color:rgba(255,255,255,.45);">{{ r.ms }}</span><span style="color:rgba(255,255,255,.45);">{{ r.cost }}</span></div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ══════════════ WATCHLISTS ══════════════ -->
+      <sc-if value="{{ isWatchlists }}" hint-placeholder-val="{{ false }}">
+      <div class="scrollthin" style="height:100%;overflow:auto;padding:28px 36px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;"><span style="font-size:10px;color:rgba(255,255,255,.22);letter-spacing:.15em;">03</span><span style="font-size:11px;color:rgba(255,255,255,.6);letter-spacing:.22em;font-weight:500;">WATCHLISTS</span><span style="flex:1;height:1px;background:rgba(255,255,255,.07);"></span><button onClick="{{ goNew }}" style="background:transparent;border:1px solid rgba(255,255,255,.16);padding:6px 13px;font:inherit;font-size:10px;letter-spacing:.1em;color:rgba(255,255,255,.65);cursor:pointer;" style-hover="border-color:rgba(255,255,255,.42);color:rgba(255,255,255,.95)">[ + NEW WATCH ]</button></div>
+        <div style="border:1px solid rgba(255,255,255,.07);">
+          <div style="display:grid;grid-template-columns:84px minmax(150px,1.5fr) 76px minmax(120px,1.3fr) 92px 70px 118px 86px;min-width:760px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.07);font-size:9.5px;letter-spacing:.16em;color:rgba(255,255,255,.32);"><span>STATUS</span><span>NAME</span><span>TYPE</span><span>TARGET</span><span>CADENCE</span><span>SIGNALS</span><span>SPEND</span><span></span></div>
+          <sc-for list="{{ watchlists }}" as="w" hint-placeholder-count="3">
+            <div style="display:grid;grid-template-columns:84px minmax(150px,1.5fr) 76px minmax(120px,1.3fr) 92px 70px 118px 86px;min-width:760px;align-items:center;padding:15px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px;" style-hover="background:rgba(255,255,255,.02)"><span style="display:flex;align-items:center;gap:7px;color:{{ w.statusColor }};font-size:10px;letter-spacing:.1em;"><span style="font-size:{{ w.glyphSize }};color:{{ w.glyphColor }};animation:{{ w.glyphAnim }};">{{ w.glyph }}</span>{{ w.status }}</span><span style="color:rgba(255,255,255,.88);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ w.name }}</span><span style="color:rgba(255,255,255,.42);">{{ w.kind }}</span><span style="color:rgba(255,255,255,.42);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ w.target }}</span><span style="color:rgba(255,255,255,.58);">{{ w.cadence }}</span><span style="color:rgba(255,255,255,.58);font-variant-numeric:tabular-nums;">{{ w.signals }}</span><span style="color:rgba(255,255,255,.58);font-variant-numeric:tabular-nums;">{{ w.spendStr }}<span style="color:rgba(255,255,255,.28);"> / {{ w.budgetStr }}</span></span><button onClick="{{ w.onRun }}" style="justify-self:end;background:transparent;border:1px solid rgba(255,255,255,.13);padding:5px 12px;font:inherit;font-size:10px;letter-spacing:.08em;color:{{ w.runColor }};cursor:pointer;" style-hover="border-color:rgba(255,255,255,.38);color:rgba(255,255,255,.95)">{{ w.runLabel }}</button></div>
+          </sc-for>
+        </div>
+        <div style="margin-top:14px;font-size:10px;color:rgba(255,255,255,.25);letter-spacing:.08em;">[ run → ] triggers an immediate scan · ⌘3 to return here</div>
+      </div>
+      </sc-if>
+
+      <!-- ══════════════ SIGNALS ══════════════ -->
+      <sc-if value="{{ isSignals }}" hint-placeholder-val="{{ false }}">
+      <div class="scrollthin" style="height:100%;overflow:auto;padding:28px 36px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px;"><span style="font-size:10px;color:rgba(255,255,255,.22);letter-spacing:.15em;">04</span><span style="font-size:11px;color:rgba(255,255,255,.6);letter-spacing:.22em;font-weight:500;">SIGNALS</span><span style="flex:1;height:1px;background:rgba(255,255,255,.07);"></span><span style="font-size:10px;color:rgba(255,255,255,.38);letter-spacing:.06em;">{{ signalCount }} shown</span></div>
+        <div style="display:flex;gap:14px;margin-bottom:4px;font-size:11px;letter-spacing:.12em;overflow-x:auto;padding-bottom:8px;flex-wrap:wrap;">
+          <sc-for list="{{ filters }}" as="f" hint-placeholder-count="11"><button onClick="{{ f.onClick }}" style="background:transparent;border:none;padding:0 0 7px;font:inherit;cursor:pointer;color:{{ f.color }};border-bottom:{{ f.border }};white-space:nowrap;flex-shrink:0;letter-spacing:.12em;">{{ f.label }}</button></sc-for>
+        </div>
+        <div style="border-top:1px solid rgba(255,255,255,.07);">
+          <sc-for list="{{ signalsAll }}" as="s" hint-placeholder-count="12">
+            <div style="display:grid;grid-template-columns:132px 16px 80px 1fr 158px;align-items:center;gap:12px;padding:14px 8px 14px 14px;border-bottom:1px solid rgba(255,255,255,.04);box-shadow:{{ s.leftBorder }};animation:slideIn .22s ease both;animation-delay:{{ s.animDelay }};" style-hover="background:rgba(255,255,255,.02)"><span style="color:rgba(255,255,255,.38);font-size:11px;font-variant-numeric:tabular-nums;">{{ s.date }} · {{ s.time }}</span><span style="color:{{ s.sevColor }};text-align:center;">{{ s.sev }}</span><span style="color:{{ s.color }};font-size:10px;letter-spacing:.1em;font-weight:500;">{{ s.typeLabel }}</span><span style="color:rgba(255,255,255,.88);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ s.title }}</span><span style="color:rgba(255,255,255,.38);font-size:11px;text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ s.source }}</span></div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ══════════════ INSIGHTS ══════════════ -->
+      <sc-if value="{{ isInsights }}" hint-placeholder-val="{{ false }}">
+      <div class="scrollthin" style="height:100%;overflow:auto;padding:28px 36px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px;"><span style="font-size:10px;color:rgba(255,255,255,.22);letter-spacing:.15em;">05</span><span style="font-size:11px;color:rgba(255,255,255,.6);letter-spacing:.22em;font-weight:500;">INSIGHTS</span><span style="flex:1;height:1px;background:rgba(255,255,255,.07);"></span></div>
+        <div style="display:flex;gap:22px;margin-bottom:4px;font-size:11px;letter-spacing:.12em;">
+          <sc-for list="{{ insightTabs }}" as="t" hint-placeholder-count="5"><button onClick="{{ t.onClick }}" style="background:transparent;border:none;padding:0 0 8px;font:inherit;cursor:pointer;color:{{ t.color }};border-bottom:{{ t.border }};">{{ t.label }}</button></sc-for>
+        </div>
+        <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:20px;">
+          <sc-if value="{{ isStock }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <div style="display:grid;grid-template-columns:72px 104px 88px minmax(140px,1fr) 1fr;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:9.5px;letter-spacing:.16em;color:rgba(255,255,255,.32);"><span>TICKER</span><span>PRICE</span><span>CHANGE</span><span>14D ACTIVITY</span><span>LATEST INTEL</span></div>
+            <sc-for list="{{ stocks }}" as="s" hint-placeholder-count="3">
+              <div style="display:grid;grid-template-columns:72px 104px 88px minmax(140px,1fr) 1fr;align-items:center;padding:18px 0;border-bottom:1px solid rgba(255,255,255,.06);" style-hover="background:rgba(255,255,255,.018)"><span style="font-size:14px;font-weight:700;letter-spacing:.08em;color:rgba(255,255,255,.96);">{{ s.ticker }}</span><span style="font-size:15px;font-weight:500;font-variant-numeric:tabular-nums;">${{ s.price }}</span><span style="font-size:12.5px;font-variant-numeric:tabular-nums;color:{{ s.chgColor }};font-weight:500;">{{ s.dir }} {{ s.chg }}</span><span style="font-size:20px;letter-spacing:2px;color:rgba(255,255,255,.38);">{{ s.spark }}</span><span style="font-size:12px;color:rgba(255,255,255,.42);">{{ s.note }}</span></div>
+            </sc-for>
+          </div>
+          </sc-if>
+          <sc-if value="{{ isPatents }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="font-size:11px;color:rgba(255,255,255,.32);letter-spacing:.08em;margin-bottom:16px;">{{ patentsCount }} filings tracked · last 30 days</div>
+            <sc-for list="{{ patents }}" as="p" hint-placeholder-count="4">
+              <div style="padding:16px 0;border-bottom:1px solid rgba(255,255,255,.06);animation:fadeUp .3s ease both;animation-delay:{{ p.animDelay }};"><div style="display:flex;gap:12px;align-items:flex-start;"><span style="color:rgba(255,255,255,.28);font-size:10px;padding-top:2px;flex-shrink:0;">■</span><div style="flex:1;"><div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px;"><span style="font-size:13px;color:rgba(255,255,255,.9);flex:1;line-height:1.4;">{{ p.title }}</span><span style="font-size:10px;color:rgba(255,255,255,.32);flex-shrink:0;letter-spacing:.06em;">{{ p.filed }}</span></div><div style="font-size:11px;color:rgba(255,255,255,.38);letter-spacing:.05em;">{{ p.company }} · {{ p.claims }} claims · {{ p.category }}</div></div></div></div>
+            </sc-for>
+          </div>
+          </sc-if>
+          <sc-if value="{{ isNewsletters }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <sc-for list="{{ newsletters }}" as="n" hint-placeholder-count="3">
+              <div style="padding:18px 0;border-bottom:1px solid rgba(255,255,255,.06);animation:fadeUp .3s ease both;animation-delay:{{ n.animDelay }};"><div style="display:flex;align-items:baseline;gap:14px;margin-bottom:7px;"><span style="flex:1;font-size:13px;color:rgba(255,255,255,.9);font-weight:500;">{{ n.name }}</span><span style="font-size:10px;color:rgba(255,255,255,.32);flex-shrink:0;">{{ n.company }} · {{ n.received }}</span></div><div style="font-size:12.5px;color:rgba(255,255,255,.58);margin-bottom:10px;">{{ n.subject }}</div><div style="display:flex;flex-direction:column;gap:4px;"><div style="font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.04em;">+ {{ n.change0 }}</div><div style="font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.04em;">+ {{ n.change1 }}</div><div style="font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.04em;">+ {{ n.change2 }}</div></div></div>
+            </sc-for>
+          </div>
+          </sc-if>
+          <sc-if value="{{ isInsider }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <sc-for list="{{ insider }}" as="i" hint-placeholder-count="5">
+              <div style="padding:15px 0;border-bottom:1px solid rgba(255,255,255,.06);animation:slideIn .25s ease both;animation-delay:{{ i.animDelay }};"><div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;"><span style="color:{{ i.sevColor }};font-size:11px;width:12px;text-align:center;flex-shrink:0;">{{ i.sev }}</span><span style="color:rgba(255,255,255,.9);font-size:13px;flex:1;">{{ i.person }}</span><span style="font-size:10px;color:rgba(255,255,255,.32);flex-shrink:0;letter-spacing:.06em;">{{ i.date }}</span></div><div style="padding-left:24px;"><div style="font-size:12px;color:rgba(255,255,255,.55);margin-bottom:4px;">{{ i.role }} · {{ i.company }}</div><div style="font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.04em;">{{ i.note }}</div></div></div>
+            </sc-for>
+          </div>
+          </sc-if>
+          <sc-if value="{{ isInvestments }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <sc-for list="{{ investments }}" as="i" hint-placeholder-count="4">
+              <div style="padding:16px 0;border-bottom:1px solid rgba(255,255,255,.06);animation:fadeUp .3s ease both;animation-delay:{{ i.animDelay }};"><div style="display:flex;align-items:baseline;gap:14px;margin-bottom:6px;"><span style="font-size:10px;color:rgba(255,255,255,.38);letter-spacing:.1em;border:1px solid rgba(255,255,255,.18);padding:2px 7px;flex-shrink:0;">{{ i.type }}</span><span style="font-size:13px;color:rgba(255,255,255,.9);flex:1;">{{ i.target }}</span><span style="font-size:13px;color:rgba(255,255,255,.65);font-variant-numeric:tabular-nums;flex-shrink:0;">{{ i.amount }}</span><span style="font-size:10px;color:rgba(255,255,255,.32);flex-shrink:0;letter-spacing:.06em;">{{ i.date }}</span></div><div style="font-size:11px;color:rgba(255,255,255,.38);letter-spacing:.04em;">{{ i.company }} · {{ i.note }}</div></div>
+            </sc-for>
+          </div>
+          </sc-if>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ══════════════ AGENT ══════════════ -->
+      <sc-if value="{{ isAgent }}" hint-placeholder-val="{{ false }}">
+      <div style="height:100%;display:grid;grid-template-columns:60% 40%;min-height:0;overflow:hidden;">
+        <div style="display:flex;flex-direction:column;padding:28px 32px;border-right:1px solid rgba(255,255,255,.07);overflow:hidden;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px;flex-shrink:0;"><span style="font-size:10px;color:rgba(255,255,255,.22);letter-spacing:.15em;">06</span><span style="font-size:11px;color:rgba(255,255,255,.6);letter-spacing:.22em;font-weight:500;">AGENT</span><span style="flex:1;height:1px;background:rgba(255,255,255,.07);"></span><span style="font-size:10px;color:rgba(255,255,255,.3);letter-spacing:.08em;">watch setup assistant</span></div>
+          <div class="scrollthin" style="flex:1;overflow:auto;display:flex;flex-direction:column;gap:16px;min-height:0;">
+            <sc-for list="{{ agentLog }}" as="m" hint-placeholder-count="1">
+              <sc-if value="{{ m.isUser }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:12px;font-size:13px;animation:slideIn .2s ease both;"><span style="color:rgba(255,255,255,.38);flex-shrink:0;">›</span><span style="color:rgba(255,255,255,.92);">{{ m.text }}</span></div></sc-if>
+              <sc-if value="{{ m.isAgent }}" hint-placeholder-val="{{ true }}"><div style="padding-left:22px;max-width:64ch;animation:fadeUp .25s ease both;"><div style="font-size:13px;line-height:1.78;color:rgba(255,255,255,.65);">{{ m.text }}</div><div style="font-size:10.5px;color:rgba(255,255,255,.28);margin-top:7px;letter-spacing:.06em;">{{ m.meta }}</div></div></sc-if>
+            </sc-for>
+          </div>
+          <div style="display:flex;align-items:center;gap:11px;border-top:1px solid rgba(255,255,255,.07);padding-top:16px;margin-top:16px;flex-shrink:0;">
+            <span style="color:rgba(255,255,255,.45);flex-shrink:0;">agent&gt;</span>
+            <input value="{{ agentInput }}" onChange="{{ onAgentChange }}" onKeyDown="{{ onAgentKey }}" placeholder="type a URL or company name…" style="flex:1;background:transparent;border:none;outline:none;color:rgba(255,255,255,.92);font:inherit;font-size:13px;" />
+            <span style="animation:blink 1.1s step-end infinite;color:rgba(255,255,255,.82);">▌</span>
+            <span style="font-size:10px;color:rgba(255,255,255,.25);letter-spacing:.06em;">↵ send</span>
+          </div>
+        </div>
+        <div class="scrollthin" style="overflow:auto;padding:24px 28px;background:rgba(255,255,255,.008);">
+          <div style="font-size:9.5px;letter-spacing:.2em;color:rgba(255,255,255,.38);margin-bottom:22px;font-weight:500;">[ WATCH CONFIG ]</div>
+          <sc-if value="{{ agentEmptyRight }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <div style="font-size:11px;color:rgba(255,255,255,.28);letter-spacing:.06em;line-height:2.1;margin-bottom:28px;">Target not configured yet.<br/>Type a URL or company name to begin.</div>
+            <div style="font-size:9.5px;color:rgba(255,255,255,.35);letter-spacing:.14em;margin-bottom:12px;">EXAMPLES</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.3);line-height:2.3;"><div>› acme.com</div><div>› track openai.com pricing + newsletters</div><div>› monitor salesforce.com for hiring</div><div>› jane doe linkedin insider intel</div></div>
+          </div>
+          </sc-if>
+          <sc-if value="{{ agentHasTarget }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid rgba(255,255,255,.1);padding:16px 18px;margin-bottom:14px;animation:fadeUp .25s ease both;">
+            <div style="font-size:9.5px;letter-spacing:.18em;color:rgba(255,255,255,.32);margin-bottom:12px;">TARGET</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.92);margin-bottom:6px;font-weight:500;">{{ agentTarget }}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.38);letter-spacing:.04em;">{{ agentUrl }}</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.28);margin-top:6px;letter-spacing:.1em;">TYPE: {{ agentType }}</div>
+          </div>
+          </sc-if>
+          <sc-if value="{{ agentHasSignals }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid rgba(255,255,255,.1);padding:16px 18px;margin-bottom:14px;animation:fadeUp .3s ease both;">
+            <div style="font-size:9.5px;letter-spacing:.18em;color:rgba(255,255,255,.32);margin-bottom:12px;">SIGNALS</div>
+            <div style="display:flex;flex-direction:column;gap:9px;">
+              <sc-for list="{{ agentSignals }}" as="s" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:10px;font-size:12px;"><span style="color:rgba(255,255,255,.45);">✓</span><span style="color:{{ s.color }};letter-spacing:.08em;">{{ s.name }}</span></div></sc-for>
+            </div>
+          </div>
+          </sc-if>
+          <sc-if value="{{ agentShowSettings }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid rgba(255,255,255,.1);padding:16px 18px;margin-bottom:18px;animation:fadeUp .35s ease both;">
+            <div style="font-size:9.5px;letter-spacing:.18em;color:rgba(255,255,255,.32);margin-bottom:12px;">SCHEDULE</div>
+            <div style="display:flex;flex-direction:column;gap:8px;font-size:12px;color:rgba(255,255,255,.65);"><div style="display:flex;gap:12px;"><span style="color:rgba(255,255,255,.38);width:72px;">CADENCE</span><span>{{ agentCadence }}</span></div><div style="display:flex;gap:12px;"><span style="color:rgba(255,255,255,.38);width:72px;">BUDGET</span><span>${{ agentBudget }} / mo</span></div></div>
+          </div>
+          </sc-if>
+          <sc-if value="{{ agentShowDeploy }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ agentDeploy }}" style="width:100%;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.28);padding:14px 22px;font:inherit;font-size:12px;letter-spacing:.12em;color:rgba(255,255,255,.92);cursor:pointer;animation:fadeUp .4s ease both;" style-hover="background:rgba(255,255,255,.11);border-color:rgba(255,255,255,.52)">[ DEPLOY WATCH ]</button>
+          </sc-if>
+          <sc-if value="{{ agentShowDone }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid rgba(255,255,255,.14);padding:16px 18px;font-size:12px;color:rgba(255,255,255,.65);letter-spacing:.04em;"><div style="color:rgba(255,255,255,.9);margin-bottom:6px;">✓ WATCH DEPLOYED</div><div style="color:rgba(255,255,255,.38);font-size:11px;">First scan queued — signals appear in Signals within 2–4 min.</div></div>
+          </sc-if>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ══════════════ ASK ══════════════ -->
+      <sc-if value="{{ isAsk }}" hint-placeholder-val="{{ false }}">
+      <div style="height:100%;display:flex;flex-direction:column;padding:28px 40px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px;flex-shrink:0;"><span style="font-size:10px;color:rgba(255,255,255,.22);letter-spacing:.15em;">07</span><span style="font-size:11px;color:rgba(255,255,255,.6);letter-spacing:.22em;font-weight:500;">ASK</span><span style="flex:1;height:1px;background:rgba(255,255,255,.07);"></span></div>
+        <div class="scrollthin" style="flex:1;overflow:auto;display:flex;flex-direction:column;gap:18px;min-height:0;">
+          <sc-for list="{{ askLog }}" as="m" hint-placeholder-count="1">
+            <sc-if value="{{ m.isSys }}" hint-placeholder-val="{{ true }}"><div style="font-size:11px;color:rgba(255,255,255,.32);letter-spacing:.06em;line-height:1.6;">{{ m.text }}</div></sc-if>
+            <sc-if value="{{ m.isYou }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:12px;font-size:13px;animation:slideIn .2s ease both;"><span style="color:rgba(255,255,255,.38);">›</span><span style="color:rgba(255,255,255,.92);">{{ m.text }}</span></div></sc-if>
+            <sc-if value="{{ m.isVigil }}" hint-placeholder-val="{{ false }}"><div style="padding-left:24px;max-width:66ch;animation:fadeUp .25s ease both;"><div style="font-size:13px;line-height:1.82;color:rgba(255,255,255,.65);">{{ m.text }}</div><div style="font-size:10.5px;color:rgba(255,255,255,.28);margin-top:9px;letter-spacing:.06em;">{{ m.meta }}</div></div></sc-if>
+          </sc-for>
+        </div>
+        <div style="display:flex;align-items:center;gap:11px;border-top:1px solid rgba(255,255,255,.07);padding-top:16px;margin-top:16px;flex-shrink:0;">
+          <span style="color:rgba(255,255,255,.45);">vigil&gt;</span>
+          <input value="{{ askInput }}" onChange="{{ onAskChange }}" onKeyDown="{{ onAskKey }}" placeholder="ask about your watches…" style="flex:1;background:transparent;border:none;outline:none;color:rgba(255,255,255,.92);font:inherit;font-size:13px;" />
+          <span style="animation:blink 1.1s step-end infinite;color:rgba(255,255,255,.82);">▌</span>
+          <span style="font-size:10px;color:rgba(255,255,255,.25);letter-spacing:.06em;">↵ send</span>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ══════════════ NEW WATCH ══════════════ -->
+      <sc-if value="{{ isNew }}" hint-placeholder-val="{{ false }}">
+      <div class="scrollthin" style="height:100%;overflow:auto;padding:30px 40px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;"><span style="font-size:10px;color:rgba(255,255,255,.22);letter-spacing:.15em;">—</span><span style="font-size:11px;color:rgba(255,255,255,.6);letter-spacing:.22em;font-weight:500;">NEW WATCH</span><span style="flex:1;height:1px;background:rgba(255,255,255,.07);"></span></div>
+        <div style="margin:0 0 28px;font-size:13px;color:rgba(255,255,255,.45);">$ vigil new-watch <span style="animation:blink 1.1s step-end infinite;color:rgba(255,255,255,.82);">▌</span></div>
+        <div style="max-width:640px;">
+          <div style="display:flex;align-items:flex-start;gap:24px;padding:18px 0;border-bottom:1px solid rgba(255,255,255,.05);"><div style="width:130px;font-size:10px;letter-spacing:.16em;color:rgba(255,255,255,.38);padding-top:7px;">SOURCE URL</div><div style="flex:1;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,.14);padding-bottom:8px;"><span style="color:rgba(255,255,255,.38);">&gt;</span><input value="{{ nwUrl }}" onChange="{{ onUrl }}" placeholder="https://competitor.com/pricing" style="flex:1;background:transparent;border:none;outline:none;color:rgba(255,255,255,.92);font:inherit;font-size:13px;" /></div></div>
+          <div style="display:flex;align-items:flex-start;gap:24px;padding:18px 0;border-bottom:1px solid rgba(255,255,255,.05);"><div style="width:130px;font-size:10px;letter-spacing:.16em;color:rgba(255,255,255,.38);padding-top:2px;">TYPE</div><div style="flex:1;display:flex;gap:22px;"><sc-for list="{{ typeOptions }}" as="t" hint-placeholder-count="3"><button onClick="{{ t.onClick }}" style="background:transparent;border:none;padding:0;font:inherit;cursor:pointer;display:flex;align-items:center;gap:8px;color:{{ t.color }};font-size:13px;"><span>{{ t.glyph }}</span>{{ t.label }}</button></sc-for></div></div>
+          <div style="display:flex;align-items:center;gap:24px;padding:18px 0;border-bottom:1px solid rgba(255,255,255,.05);"><div style="width:130px;font-size:10px;letter-spacing:.16em;color:rgba(255,255,255,.38);">CADENCE</div><div style="flex:1;display:flex;align-items:center;gap:16px;font-size:13px;"><button onClick="{{ cadencePrev }}" style="background:transparent;border:none;padding:4px 8px;font:inherit;font-size:16px;color:rgba(255,255,255,.45);cursor:pointer;" style-hover="color:rgba(255,255,255,.95)">‹</button><span style="min-width:96px;color:rgba(255,255,255,.92);text-align:center;letter-spacing:.04em;">{{ cadLabel }}</span><button onClick="{{ cadenceNext }}" style="background:transparent;border:none;padding:4px 8px;font:inherit;font-size:16px;color:rgba(255,255,255,.45);cursor:pointer;" style-hover="color:rgba(255,255,255,.95)">›</button></div></div>
+          <div style="display:flex;align-items:center;gap:24px;padding:18px 0;border-bottom:1px solid rgba(255,255,255,.05);"><div style="width:130px;font-size:10px;letter-spacing:.16em;color:rgba(255,255,255,.38);">BUDGET</div><div style="flex:1;display:flex;align-items:center;gap:8px;font-size:13px;"><span style="color:rgba(255,255,255,.45);">$</span><input value="{{ nwBudget }}" onChange="{{ onBudget }}" style="width:70px;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.14);outline:none;color:rgba(255,255,255,.92);font:inherit;font-size:13px;text-align:center;" /><span style="color:rgba(255,255,255,.38);">/ month</span></div></div>
+          <div style="display:flex;align-items:center;gap:24px;padding:18px 0;border-bottom:1px solid rgba(255,255,255,.05);"><div style="width:130px;font-size:10px;letter-spacing:.16em;color:rgba(255,255,255,.38);">ALERTS</div><div style="flex:1;display:flex;gap:24px;font-size:13px;"><button onClick="{{ setEmail }}" style="background:transparent;border:none;padding:0;font:inherit;cursor:pointer;display:flex;gap:8px;color:{{ nwEmailColor }};"><span>{{ nwEmail }}</span>email</button><button onClick="{{ setSlack }}" style="background:transparent;border:none;padding:0;font:inherit;cursor:pointer;display:flex;gap:8px;color:{{ nwSlackColor }};"><span>{{ nwSlack }}</span>slack</button></div></div>
+          <div style="display:flex;align-items:center;gap:18px;margin-top:28px;"><button onClick="{{ createWatch }}" style="background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.22);padding:11px 22px;font:inherit;font-size:12px;letter-spacing:.1em;color:rgba(255,255,255,.92);cursor:pointer;" style-hover="background:rgba(255,255,255,.11);border-color:rgba(255,255,255,.48)">[ CREATE WATCH ]</button><span style="font-size:11px;color:rgba(255,255,255,.28);letter-spacing:.08em;">esc to cancel</span></div>
+          <sc-if value="{{ nwCreated }}" hint-placeholder-val="{{ false }}"><div style="margin-top:22px;padding:14px 18px;border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.018);font-size:12px;color:rgba(255,255,255,.65);letter-spacing:.02em;">✓ watch created — monitoring {{ nwSummary }}. first scan queued.</div></sc-if>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ══════════════ SETTINGS ══════════════ -->
+      <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+      <div class="scrollthin" style="height:100%;overflow:auto;padding:28px 40px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:32px;"><span style="font-size:10px;color:rgba(255,255,255,.22);letter-spacing:.15em;">08</span><span style="font-size:11px;color:rgba(255,255,255,.6);letter-spacing:.22em;font-weight:500;">SETTINGS</span><span style="flex:1;height:1px;background:rgba(255,255,255,.07);"></span></div>
+        <div style="font-size:9.5px;letter-spacing:.18em;color:rgba(255,255,255,.38);margin-bottom:14px;">ACCOUNT</div>
+        <div style="border:1px solid rgba(255,255,255,.07);padding:22px 26px;display:flex;align-items:center;gap:20px;margin-bottom:32px;animation:fadeUp .3s ease both;">
+          <div style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:1px solid rgba(255,255,255,.28);font-size:14px;color:rgba(255,255,255,.78);flex-shrink:0;">JD</div>
+          <div style="flex:1;"><div style="font-size:14px;color:rgba(255,255,255,.92);font-weight:500;margin-bottom:4px;">Jane Doe</div><div style="font-size:12px;color:rgba(255,255,255,.42);letter-spacing:.04em;">jane@company.com</div></div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;"><div style="font-size:10px;letter-spacing:.14em;border:1px solid rgba(255,255,255,.28);padding:3px 10px;color:rgba(255,255,255,.65);">PRO</div><div style="font-size:10px;color:rgba(255,255,255,.32);letter-spacing:.06em;">3/10 watches</div></div>
+        </div>
+        <div style="font-size:9.5px;letter-spacing:.18em;color:rgba(255,255,255,.38);margin-bottom:14px;">NOTIFICATIONS</div>
+        <div style="border:1px solid rgba(255,255,255,.07);margin-bottom:32px;">
+          <div style="display:grid;grid-template-columns:1fr 80px 80px 80px;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.07);font-size:9.5px;letter-spacing:.16em;color:rgba(255,255,255,.32);"><span>SIGNAL TYPE</span><span style="text-align:center;">EMAIL</span><span style="text-align:center;">SLACK</span><span style="text-align:center;">DIGEST</span></div>
+          <sc-for list="{{ notifRows }}" as="r" hint-placeholder-count="6">
+            <div style="display:grid;grid-template-columns:1fr 80px 80px 80px;align-items:center;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.04);"><span style="color:{{ r.color }};font-size:12px;letter-spacing:.06em;">{{ r.label }}</span><span style="text-align:center;font-size:12px;color:rgba(255,255,255,.52);">{{ r.email }}</span><span style="text-align:center;font-size:12px;color:rgba(255,255,255,.52);">{{ r.slack }}</span><span style="text-align:center;font-size:12px;color:rgba(255,255,255,.52);">{{ r.digest }}</span></div>
+          </sc-for>
+        </div>
+        <div style="font-size:9.5px;letter-spacing:.18em;color:rgba(255,255,255,.38);margin-bottom:14px;">INTEGRATIONS</div>
+        <div style="border:1px solid rgba(255,255,255,.07);margin-bottom:32px;">
+          <div style="display:grid;grid-template-columns:140px 1fr 90px;align-items:center;padding:15px 16px;border-bottom:1px solid rgba(255,255,255,.04);"><span style="font-size:10px;letter-spacing:.12em;color:rgba(255,255,255,.38);">SUPABASE URL</span><span style="font-size:12px;color:rgba(255,255,255,.52);">https://xxxxxxxxxxxx.supabase.co</span><button style="justify-self:end;background:transparent;border:1px solid rgba(255,255,255,.13);padding:4px 10px;font:inherit;font-size:10px;letter-spacing:.08em;color:rgba(255,255,255,.45);cursor:pointer;" style-hover="color:rgba(255,255,255,.9)">[ edit ]</button></div>
+          <div style="display:grid;grid-template-columns:140px 1fr 90px;align-items:center;padding:15px 16px;border-bottom:1px solid rgba(255,255,255,.04);"><span style="font-size:10px;letter-spacing:.12em;color:rgba(255,255,255,.38);">SUPABASE KEY</span><span style="font-size:12px;color:rgba(255,255,255,.52);letter-spacing:.1em;">•••••••••••••••••••••••••</span><button style="justify-self:end;background:transparent;border:1px solid rgba(255,255,255,.13);padding:4px 10px;font:inherit;font-size:10px;letter-spacing:.08em;color:rgba(255,255,255,.45);cursor:pointer;" style-hover="color:rgba(255,255,255,.9)">[ reveal ]</button></div>
+          <div style="display:grid;grid-template-columns:140px 1fr 90px;align-items:center;padding:15px 16px;"><span style="font-size:10px;letter-spacing:.12em;color:rgba(255,255,255,.38);">OPENAI KEY</span><span style="font-size:12px;color:rgba(255,255,255,.52);letter-spacing:.1em;">•••••••••••••••••••••••••</span><button style="justify-self:end;background:transparent;border:1px solid rgba(255,255,255,.13);padding:4px 10px;font:inherit;font-size:10px;letter-spacing:.08em;color:rgba(255,255,255,.45);cursor:pointer;" style-hover="color:rgba(255,255,255,.9)">[ reveal ]</button></div>
+        </div>
+        <div style="font-size:9.5px;letter-spacing:.18em;color:rgba(255,255,255,.38);margin-bottom:14px;">BILLING</div>
+        <div style="border:1px solid rgba(255,255,255,.07);padding:22px 26px;">
+          <div style="display:grid;grid-template-columns:140px 1fr;gap:13px;font-size:12px;">
+            <span style="color:rgba(255,255,255,.38);letter-spacing:.08em;">PLAN</span><span style="color:rgba(255,255,255,.85);">Pro · $49 / month</span>
+            <span style="color:rgba(255,255,255,.38);letter-spacing:.08em;">NEXT BILL</span><span style="color:rgba(255,255,255,.65);">Jul 14, 2026</span>
+            <span style="color:rgba(255,255,255,.38);letter-spacing:.08em;">WATCHES</span><span style="color:rgba(255,255,255,.65);">3/10 · <span style="letter-spacing:1px;"><span style="color:rgba(255,255,255,.52);">███</span><span style="color:rgba(255,255,255,.1);">░░░░░░░</span></span> 30%</span>
+            <span style="color:rgba(255,255,255,.38);letter-spacing:.08em;">SIGNALS MTD</span><span style="color:rgba(255,255,255,.65);">12 / unlimited</span>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  TYPE_COLOR = {pricing:'#E3B341',promo:'#D178C9',hiring:'#6FCF8E',person:'#5BC8D6',site:'#6E9BE6',newsletter:'#E8956D',patent:'#A78BFA',insider:'#FC8C8C',stock:'#4ADE80',investments:'#60A5FA'};
+  CADENCE = ['every 1h','every 6h','daily','weekly'];
+  WIDGET_DEFS = {
+    analytics:{label:'ANALYTICS',desc:'Signal activity and type breakdown'},
+    watchlists:{label:'WATCHLISTS',desc:'Live status of active watches'},
+    signals:{label:'SIGNALS',desc:'Latest signals with severity'},
+    brief:{label:'BRIEF',desc:'AI-generated intelligence summary'},
+    stock:{label:'LIVE TICKERS',desc:'Stock prices and market movements'},
+    newsletters:{label:'NEWSLETTERS',desc:'Competitor newsletter analysis'},
+    patents:{label:'PATENTS',desc:'New patent filings and claims'},
+    insider:{label:'INSIDER INTEL',desc:'Executive moves and org shifts'},
+  };
+
+  state = {
+    view:'overview',now:new Date(),running:null,
+    sigFilter:'all',insightTab:'stock',
+    configuring:false,
+    widgets:{analytics:true,watchlists:true,signals:true,brief:true,stock:true,newsletters:true,patents:false,insider:false},
+    counters:{signals:0,watches:0,live:0,spend:0},
+    askInput:'',askLog:[{role:'sys',text:'ASK VIGIL \u2014 query 3 watches in natural language.  try: "what changed at acme this week?"'}],
+    agentInput:'',
+    agentLog:[{role:'agent',text:'I\u2019m your watch setup agent. Tell me which company, website, or person you want to monitor \u2014 paste a URL or type a name.',meta:'vigil agent v1.0'}],
+    agentStage:0,agentConfig:{name:'',url:'',type:'company',signals:[],cadence:'',budget:''},
+    nw:{url:'',type:'company',cadence:1,budget:'3.00',email:true,slack:false,created:false},
+  };
+
+  WATCHES = [
+    {id:'acme',name:'ACME CORP \u2014 PRICING',status:'live',kind:'company',target:'acme.com',cadence:'every 6h',signals:5,spend:1.10,budget:3.00,pct:37},
+    {id:'jane',name:'JANE DOE \u2014 LINKEDIN',status:'live',kind:'person',target:'linkedin.com/in/janedoe',cadence:'daily',signals:2,spend:0.14,budget:1.00,pct:14},
+    {id:'nvda',name:'NVDA TICKER WATCH',status:'paused',kind:'ticker',target:'NVDA',cadence:'hourly',signals:0,spend:0.00,budget:1.00,pct:0},
+  ];
+  SIGNALS = [
+    {sev:'\u25b2',title:'Pro tier price increased 12%',type:'pricing',source:'Acme Corp \u2014 Pricing',date:'Jun 14',time:'08:33 PM'},
+    {sev:'\u00b7',title:'SVP Engineering hired from Stripe',type:'insider',source:'LinkedIn \u00b7 Acme Corp',date:'Jun 14',time:'10:15 AM'},
+    {sev:'\u00b7',title:'Acme newsletter: Pro tier launch campaign',type:'newsletter',source:'Acme Newsletter',date:'Jun 14',time:'09:00 AM'},
+    {sev:'\u00b7',title:'New annual discount banner',type:'promo',source:'Acme Corp \u2014 Pricing',date:'Jun 14',time:'07:18 PM'},
+    {sev:'\u00b7',title:'New VP Product role listed',type:'hiring',source:'Jane Doe \u2014 LinkedIn',date:'Jun 14',time:'04:18 PM'},
+    {sev:'\u00b7',title:'3 new EMEA sales openings posted',type:'hiring',source:'Acme Corp \u2014 Pricing',date:'Jun 13',time:'07:18 PM'},
+    {sev:'\u00b7',title:'Patent: adaptive pricing engine with ML cohort',type:'patent',source:'USPTO \u00b7 Acme Corp',date:'Jun 12',time:'--'},
+    {sev:'\u00b7',title:'NVDA insider buy \u2014 $2.1M block trade',type:'stock',source:'SEC \u00b7 NVDA',date:'Jun 12',time:'16:00 PM'},
+    {sev:'\u00b7',title:'Bio section rewritten',type:'site',source:'Jane Doe \u2014 LinkedIn',date:'Jun 11',time:'09:18 PM'},
+    {sev:'\u00b7',title:'Homepage hero changed to enterprise focus',type:'site',source:'Acme Corp \u2014 Pricing',date:'Jun 10',time:'02:11 PM'},
+    {sev:'\u00b7',title:'New customer case study published',type:'promo',source:'Acme Corp \u2014 Pricing',date:'Jun 09',time:'11:40 AM'},
+    {sev:'\u25b2',title:'Headcount up 8% month-over-month',type:'hiring',source:'Acme Corp \u2014 Pricing',date:'Jun 08',time:'09:02 AM'},
+  ];
+  ACTIVITY = [
+    {day:'Jun 01',count:1},{day:'Jun 02',count:1},{day:'Jun 03',count:2},{day:'Jun 04',count:1},{day:'Jun 05',count:2},
+    {day:'Jun 06',count:3},{day:'Jun 07',count:2},{day:'Jun 08',count:2},{day:'Jun 09',count:3},{day:'Jun 10',count:4},
+    {day:'Jun 11',count:5},{day:'Jun 12',count:3},{day:'Jun 13',count:6},{day:'Jun 14',count:8},
+  ];
+  SCAN_LOG = [
+    {date:'Jun 14',time:'08:33 PM',watch:'Acme Corp \u2014 Pricing',signals:3,ms:'1.2s',cost:'$0.04'},
+    {date:'Jun 14',time:'07:18 PM',watch:'Acme Corp \u2014 Pricing',signals:1,ms:'0.9s',cost:'$0.03'},
+    {date:'Jun 14',time:'04:18 PM',watch:'Jane Doe \u2014 LinkedIn',signals:1,ms:'0.8s',cost:'$0.02'},
+    {date:'Jun 13',time:'07:18 PM',watch:'Acme Corp \u2014 Pricing',signals:1,ms:'1.1s',cost:'$0.04'},
+    {date:'Jun 11',time:'09:18 PM',watch:'Jane Doe \u2014 LinkedIn',signals:1,ms:'0.8s',cost:'$0.02'},
+    {date:'Jun 10',time:'02:11 PM',watch:'Acme Corp \u2014 Pricing',signals:1,ms:'0.9s',cost:'$0.03'},
+    {date:'Jun 09',time:'11:40 AM',watch:'Acme Corp \u2014 Pricing',signals:1,ms:'1.0s',cost:'$0.03'},
+    {date:'Jun 08',time:'09:02 AM',watch:'Acme Corp \u2014 Pricing',signals:1,ms:'1.2s',cost:'$0.04'},
+  ];
+  STOCKS = [
+    {ticker:'NVDA',price:'124.50',chg:'+3.2%',dir:'\u25b2',note:'insider buy Jun 12 \u00b7 $2.1M block',spark:'\u2581\u2582\u2581\u2583\u2584\u2585\u2584\u2586\u2587\u2586\u2587\u2588\u2587\u2588'},
+    {ticker:'CRM',price:'218.30',chg:'-1.1%',dir:'\u25bc',note:'earnings beat Jun 10 \u00b7 +8% AH',spark:'\u2588\u2587\u2586\u2587\u2585\u2586\u2584\u2585\u2583\u2584\u2583\u2582\u2583\u2582'},
+    {ticker:'MSFT',price:'420.10',chg:'+0.4%',dir:'\u2192',note:'Azure growth +29% YoY',spark:'\u2584\u2584\u2585\u2584\u2585\u2585\u2584\u2585\u2584\u2584\u2585\u2584\u2585\u2585'},
+  ];
+  PATENTS = [
+    {company:'Acme Corp',title:'Adaptive pricing engine with ML-driven cohort segmentation',filed:'Jun 12',category:'AI / Pricing',claims:14},
+    {company:'Acme Corp',title:'Multi-tenant SaaS billing reconciliation method',filed:'Jun 03',category:'FinTech / SaaS',claims:8},
+    {company:'Competitor X',title:'Federated identity token exchange for enterprise SSO',filed:'May 28',category:'Security / Identity',claims:21},
+    {company:'Acme Corp',title:'Real-time usage telemetry aggregation pipeline',filed:'May 14',category:'Infrastructure',claims:11},
+  ];
+  NEWSLETTERS = [
+    {name:'Acme Product Digest',company:'Acme Corp',received:'Jun 14',subject:'Introducing Pro tier \u2014 now more powerful',changes:['New pricing section added','Hero changed to enterprise copy','3 new feature announcements']},
+    {name:'Competitor Weekly',company:'Competitor X',received:'Jun 11',subject:'Summer launch preview \u2014 pricing changes',changes:['Pricing removed from nav','New enterprise page linked','Tone: mid-market \u2192 enterprise']},
+    {name:'Acme Growth Letter',company:'Acme Corp',received:'Jun 07',subject:'EMEA expansion: what\u2019s next',changes:['New EMEA sales team intro','4 open roles linked','Regional pricing hinted']},
+  ];
+  INSIDER = [
+    {sev:'\u00b7',person:'Sarah Chen',role:'SVP Engineering',company:'Acme Corp',date:'Jun 14',note:'Former Stripe VP \u2014 signals scaling infra push'},
+    {sev:'\u25b2',person:'Mark Torres',role:'Head of Sales EMEA',company:'Acme Corp',date:'Jun 12',note:'Joined Competitor X \u2014 attrition risk to monitor'},
+    {sev:'\u00b7',person:'Jane Doe',role:'VP Product confirmed',company:'Acme Corp',date:'Jun 11',note:'Role confirmed via press release Jun 12'},
+    {sev:'\u25b2',person:'Anonymous',role:'Glassdoor review',company:'Acme Corp',date:'Jun 09',note:'Rating 4.2\u21923.9 \u2014 culture reviews trending negative'},
+    {sev:'\u00b7',person:'Open roles',role:'3\u00d7 Enterprise AE (EMEA)',company:'Acme Corp',date:'Jun 08',note:'Aggressive EMEA sales buildout underway'},
+  ];
+  INVESTMENTS = [
+    {company:'Acme Corp',type:'ACQUISITION',target:'DataSync AI',amount:'$12M',date:'Jun 10',note:'Data pipeline AI \u2014 may compete with your stack'},
+    {company:'Acme Corp',type:'INVESTMENT',target:'Runway AI (Series A)',amount:'$4.5M',date:'May 28',note:'Portfolio AI bet \u2014 signals strategy shift'},
+    {company:'Competitor X',type:'FUNDING',target:'Series B round',amount:'$45M',date:'May 15',note:'24mo runway \u2014 aggressive hiring expected'},
+    {company:'Acme Corp',type:'PARTNERSHIP',target:'Salesforce ISV program',amount:'\u2014',date:'May 08',note:'CRM distribution channel \u2014 new GTM surface'},
+  ];
+
+  componentDidMount(){
+    this._t=setInterval(()=>this.setState({now:new Date()}),1000);
+    this._k=(e)=>{
+      if(e.metaKey||e.ctrlKey){
+        const m={'1':'overview','2':'analytics','3':'watchlists','4':'signals','5':'insights','a':'agent','k':'ask',',':'settings','n':'new'};
+        const v=m[e.key.toLowerCase()];
+        if(v){e.preventDefault();this.setState({view:v});}
+      } else if(e.key==='Escape'){
+        if(this.state.configuring)this.setState({configuring:false});
+        else if(this.state.view==='new')this.setState({view:'overview'});
+      }
+    };
+    window.addEventListener('keydown',this._k);
+    this._animCounters();
+  }
+  componentWillUnmount(){clearInterval(this._t);clearTimeout(this._r);window.removeEventListener('keydown',this._k);}
+
+  _animCounters(){
+    const T={signals:12,watches:3,live:2,spend:124};
+    const dur=1800,start=Date.now();
+    const tick=()=>{
+      const p=Math.min((Date.now()-start)/dur,1);
+      const e=1-Math.pow(1-p,4);
+      this.setState({counters:{signals:Math.round(e*T.signals),watches:Math.round(e*T.watches),live:Math.round(e*T.live),spend:Math.round(e*T.spend)}});
+      if(p<1)requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  buildChart(data,opts){
+    opts=opts||{};
+    const W=opts.w||320,H=opts.h||80;
+    const pad={t:14,r:8,b:6,l:4};
+    const iw=W-pad.l-pad.r,ih=H-pad.t-pad.b;
+    const maxV=Math.max.apply(null,data.map(d=>d.count))||1;
+    const pts=data.map((d,i)=>({
+      x:pad.l+(i/(data.length-1))*iw,
+      y:pad.t+ih-(d.count/maxV)*ih
+    }));
+    let path=`M${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`;
+    for(let i=1;i<pts.length;i++){
+      const mx=(pts[i-1].x+pts[i].x)/2;
+      path+=` C${mx.toFixed(1)},${pts[i-1].y.toFixed(1)} ${mx.toFixed(1)},${pts[i].y.toFixed(1)} ${pts[i].x.toFixed(1)},${pts[i].y.toFixed(1)}`;
+    }
+    const area=path+` L${(pad.l+iw).toFixed(1)},${(pad.t+ih).toFixed(1)} L${pad.l},${(pad.t+ih).toFixed(1)} Z`;
+    const len=iw*2.2;
+    const gid='cg'+W;
+    return React.createElement('svg',{
+      viewBox:`0 0 ${W} ${H}`,
+      style:{width:'100%',height:opts.height||`${H}px`,display:'block',overflow:'visible',flexShrink:0}
+    },
+      React.createElement('defs',null,
+        React.createElement('linearGradient',{id:gid,x1:'0',y1:'0',x2:'0',y2:'1'},
+          React.createElement('stop',{offset:'0%',stopColor:'rgba(255,255,255,0.14)'}),
+          React.createElement('stop',{offset:'100%',stopColor:'rgba(255,255,255,0.0)'})
+        )
+      ),
+      ...[0.25,0.5,0.75,1].map((f,i)=>React.createElement('line',{
+        key:i,x1:pad.l,y1:pad.t+ih*(1-f),x2:pad.l+iw,y2:pad.t+ih*(1-f),
+        stroke:'rgba(255,255,255,0.04)',strokeWidth:1
+      })),
+      React.createElement('path',{d:area,fill:`url(#${gid})`}),
+      React.createElement('path',{
+        d:path,fill:'none',
+        stroke:'rgba(255,255,255,0.72)',strokeWidth:1.5,
+        strokeLinecap:'round',strokeLinejoin:'round',
+        style:{strokeDasharray:len,strokeDashoffset:len,
+          animation:`chartDraw 1.4s cubic-bezier(0.4,0,0.2,1) forwards 0.6s`}
+      }),
+      React.createElement('circle',{cx:pts[pts.length-1].x,cy:pts[pts.length-1].y,r:7,fill:'none',stroke:'rgba(255,255,255,0.1)',strokeWidth:1}),
+      React.createElement('circle',{cx:pts[pts.length-1].x,cy:pts[pts.length-1].y,r:2.5,fill:'rgba(255,255,255,0.9)'})
+    );
+  }
+
+  go(v){return ()=>this.setState({view:v});}
+  runWatch(id){return ()=>{this.setState({running:id});clearTimeout(this._r);this._r=setTimeout(()=>this.setState({running:null}),1800);};}
+  meter(pct,n){n=n||10;const f=Math.round(pct/100*n);return{fill:'\u2588'.repeat(f),track:'\u2591'.repeat(n-f)};}
+  toggleWidget(k){return ()=>this.setState(s=>({widgets:{...s.widgets,[k]:!s.widgets[k]}}));}
+
+  onAskChange=(e)=>this.setState({askInput:e.target.value});
+  onAskKey=(e)=>{if(e.key==='Enter')this.askSubmit();};
+  askSubmit(){
+    const q=this.state.askInput.trim();if(!q)return;
+    const a=this.askAnswer(q);
+    this.setState(s=>({askInput:'',askLog:[...s.askLog,{role:'you',text:q},{role:'vigil',text:a.text,meta:a.meta}]}));
+  }
+  askAnswer(q){
+    const l=q.toLowerCase();
+    if(l.includes('acme')||l.includes('pric'))return{text:'Acme raised Pro pricing 12% on Jun 14 and shipped an annual-discount banner. SVP Engineering from Stripe plus 3 EMEA sales roles signal an upmarket regional push.',meta:'4 sources \u00b7 acme corp \u00b7 confidence 82%'};
+    if(l.includes('jane')||l.includes('linkedin')||l.includes('insider'))return{text:'Jane Doe added VP Product (Jun 11). Mark Torres departed to Competitor X. EMEA hiring is up 2\u00d7 WoW.',meta:'2 sources \u00b7 jane doe, acme corp \u00b7 confidence 74%'};
+    if(l.includes('nvda')||l.includes('stock')||l.includes('ticker'))return{text:'NVDA watch is paused. Insider bought $2.1M on Jun 12; NVDA up 3.2% today. Resume the ticker watch for hourly signals.',meta:'1 source \u00b7 nvda \u00b7 paused'};
+    if(l.includes('newsletter'))return{text:'Acme\u2019s Jun 14 newsletter introduced Pro tier with enterprise hero rewrite. Competitor X removed pricing from their nav \u2014 both pivoting upmarket.',meta:'2 newsletters \u00b7 acme corp, competitor x'};
+    if(l.includes('patent'))return{text:'Acme filed 3 patents in June: ML pricing engine, SaaS billing method, telemetry pipeline. The pricing engine (14 claims) directly overlaps your space.',meta:'3 patents \u00b7 USPTO \u00b7 acme corp'};
+    if(l.includes('invest')||l.includes('acqui'))return{text:'Acme acquired DataSync AI ($12M) and invested in Runway AI ($4.5M). Competitor X closed $45M Series B. Expect aggressive hiring from both.',meta:'3 events \u00b7 crunchbase \u00b7 confidence 91%'};
+    return{text:'Across 3 watches there are 12 signals in 14 days. Pricing (5), hiring (3), insider (2) lead. Acme Corp is the most active target.',meta:'aggregated \u00b7 3 watches'};
+  }
+
+  onAgentChange=(e)=>this.setState({agentInput:e.target.value});
+  onAgentKey=(e)=>{if(e.key==='Enter')this.agentSubmit();};
+  agentSubmit(){
+    const q=this.state.agentInput.trim();if(!q)return;
+    const ans=this.agentAnswer(q);
+    this.setState(s=>({agentInput:'',agentLog:[...s.agentLog,{role:'user',text:q,meta:''},{role:'agent',text:ans.text,meta:ans.meta}],agentStage:ans.newStage,agentConfig:Object.assign({},s.agentConfig,ans.configUpdate)}));
+  }
+  agentDeploy=()=>{this.setState(s=>({agentLog:[...s.agentLog,{role:'agent',text:'Watch created. First scan queued \u2014 signals appear within 2\u20134 minutes.',meta:'deployed \u2713'}],agentStage:4,agentConfig:Object.assign({},s.agentConfig,{deployed:true})}));};
+  agentAnswer(q){
+    const stage=this.state.agentStage;const l=q.toLowerCase();
+    const urlM=q.match(/(https?:\/\/[^\s]+)|([\w-]+\.(com|io|co|net|org|ai|app|dev))/i);
+    if(stage===0){const raw=urlM?urlM[0]:q.trim();const display=raw.replace(/https?:\/\//,'').replace(/^www\./,'').slice(0,40);return{text:'Got it \u2014 tracking '+display+'. Looks like a B2B SaaS company. Defaults: pricing, hiring, site changes. Want to add newsletters, patents, insider moves, stock, or investments?',meta:'target confirmed',configUpdate:{name:display,url:raw,type:'company'},newStage:1};}
+    if(stage===1){const sigs=['pricing','hiring','site'];if(l.includes('newsletter')||l.includes('mail'))sigs.push('newsletter');if(l.includes('patent'))sigs.push('patent');if(l.includes('insider')||l.includes('exec'))sigs.push('insider');if(l.includes('stock'))sigs.push('stock');if(l.includes('invest'))sigs.push('investments');if(l.includes('all'))['newsletter','patent','insider','stock','investments'].forEach(t=>{if(!sigs.includes(t))sigs.push(t);});return{text:'Added '+(sigs.slice(3).join(', ')||'defaults')+'. Scan cadence \u2014 hourly, every 6h, or daily? Monthly budget in $?',meta:sigs.length+' signal types configured',configUpdate:{signals:sigs},newStage:2};}
+    if(stage===2){const cad=l.includes('hour')?'hourly':l.includes('6h')?'every 6h':l.includes('daily')?'daily':'every 6h';const bM=q.match(/\d+(\.\d+)?/);const bud=bM?parseFloat(bM[0]).toFixed(2):'3.00';return{text:'Set: scan '+cad+', $'+bud+'/mo. Config complete \u2014 review and hit Deploy.',meta:'ready to deploy',configUpdate:{cadence:cad,budget:bud},newStage:3};}
+    return{text:'Watch is configured. Hit [ DEPLOY WATCH ] to activate.',meta:'',configUpdate:{},newStage:stage};
+  }
+
+  setType(t){return ()=>this.setState(s=>({nw:{...s.nw,type:t}}));}
+  cadenceStep(d){return ()=>this.setState(s=>({nw:{...s.nw,cadence:(s.nw.cadence+d+this.CADENCE.length)%this.CADENCE.length}}));}
+  onUrl=(e)=>{const v=e.target.value;this.setState(s=>({nw:{...s.nw,url:v}}));};
+  onBudget=(e)=>{const v=e.target.value;this.setState(s=>({nw:{...s.nw,budget:v}}));};
+  toggle(k){return ()=>this.setState(s=>({nw:{...s.nw,[k]:!s.nw[k]}}));}
+  createWatch=()=>this.setState(s=>({nw:{...s.nw,created:true}}));
+
+  renderVals(){
+    const d=this.state.now,p=n=>String(n).padStart(2,'0');
+    const clock=`${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())}`;
+    const view=this.state.view;
+    const c=this.state.counters;
+    const animSignals=c.signals;
+    const animWatches=c.watches;
+    const animLive=c.live;
+    const animSpend='$'+(c.spend/100).toFixed(2);
+
+    if(!this._charts){
+      this._charts={
+        sm:this.buildChart(this.ACTIVITY,{w:340,h:78,height:'78px'}),
+        lg:this.buildChart(this.ACTIVITY,{w:520,h:108,height:'108px'}),
+      };
+    }
+
+    const NAV=[
+      {id:'overview',idx:'01',label:'OVERVIEW',hint:'\u23181'},
+      {id:'analytics',idx:'02',label:'ANALYTICS',hint:'\u23182'},
+      {id:'watchlists',idx:'03',label:'WATCHLISTS',hint:'\u23183'},
+      {id:'signals',idx:'04',label:'SIGNALS',hint:'\u23184'},
+      {id:'insights',idx:'05',label:'INSIGHTS',hint:'\u23185'},
+      {id:'agent',idx:'06',label:'AGENT',hint:'\u2318A'},
+      {id:'ask',idx:'07',label:'ASK',hint:'\u2318K'},
+      {id:'settings',idx:'08',label:'SETTINGS',hint:'\u2318,'},
+    ];
+    const navItems=NAV.map(n=>{const active=n.id===view||(n.id==='watchlists'&&view==='new');return Object.assign({},n,{color:active?'rgba(255,255,255,0.96)':'rgba(255,255,255,0.42)',bg:active?'rgba(255,255,255,0.05)':'transparent',border:active?'2px solid rgba(255,255,255,0.82)':'2px solid transparent',onClick:this.go(n.id)});});
+
+    const wl=this.WATCHES.map(w=>{const m=this.meter(w.pct,10);const busy=this.state.running===w.id;return Object.assign({},w,{glyph:w.status==='live'?'\u25cf':'\u258c',glyphColor:w.status==='live'?'rgba(255,255,255,0.9)':'rgba(255,255,255,0.28)',glyphSize:w.status==='live'?'9px':'11px',glyphAnim:w.status==='live'?'pulse 2.4s infinite':'none',statusColor:w.status==='live'?'rgba(255,255,255,0.48)':'rgba(255,255,255,0.28)',fill:m.fill,track:m.track,spendStr:'$'+w.spend.toFixed(2),budgetStr:'$'+w.budget.toFixed(2),busy,scanning:busy,runLabel:busy?'\u00b7\u00b7\u00b7':'run \u2192',runColor:busy?'rgba(255,255,255,0.35)':'rgba(255,255,255,0.65)',onRun:this.runWatch(w.id)});});
+
+    const sig=this.SIGNALS.map((s,i)=>{const col=this.TYPE_COLOR[s.type]||'rgba(255,255,255,0.6)';return Object.assign({},s,{typeLabel:s.type.toUpperCase(),color:col,sevColor:s.sev==='\u25b2'?'rgba(255,255,255,0.9)':'rgba(255,255,255,0.28)',leftBorder:'inset 3px 0 0 '+col,animDelay:(i*0.04)+'s'});});
+    const sigTop=sig.slice(0,5);
+    const sigFilter=this.state.sigFilter;
+    const filtered=sigFilter==='all'?sig:sig.filter(s=>s.type===sigFilter);
+    const SIG_TYPES=['all','pricing','promo','hiring','person','site','newsletter','patent','insider','stock','investments'];
+    const filters=SIG_TYPES.map(f=>{const active=f===sigFilter;const tc=f==='all'?'rgba(255,255,255,0.88)':this.TYPE_COLOR[f]||'rgba(255,255,255,0.7)';return{id:f,label:f.toUpperCase(),color:active?tc:'rgba(255,255,255,0.28)',border:active?'1px solid rgba(255,255,255,0.48)':'1px solid transparent',onClick:()=>this.setState({sigFilter:f})};});
+
+    const spark=[1,1,2,1,2,3,2,2,3,4,5,3,6,8];
+    const blocks='\u2581\u2582\u2583\u2584\u2585\u2586\u2587\u2588';
+    const mn=Math.min.apply(null,spark),mx=Math.max.apply(null,spark);
+    const sparkChars=spark.map((v,i)=>({ch:blocks[Math.round((v-mn)/(mx-mn)*(blocks.length-1))],color:i>=spark.length-1?'rgba(255,255,255,0.95)':i>=spark.length-3?'rgba(255,255,255,0.6)':'rgba(255,255,255,0.3)'}));
+
+    const rawT=[['pricing',5],['hiring',3],['promo',2],['site',2],['newsletter',2],['patent',1],['insider',1]];
+    const maxT=5,W=14;
+    const typeBars=rawT.map(pair=>{const t=pair[0],c2=pair[1];const f=Math.round(c2/maxT*W);return{label:t.toUpperCase(),color:this.TYPE_COLOR[t]||'rgba(255,255,255,0.6)',count:c2,fill:'\u2588'.repeat(f),track:'\u2591'.repeat(W-f)};});
+
+    const brief={title:'ACME MOVES UPMARKET ON PRICING',body:'Acme raised Pro pricing 12% and launched an annual discount push, signaling confidence and a hunt for higher-ACV customers. Combined with new EMEA hires and an SVP Engineering from Stripe, they may be preparing a regional expansion play worth monitoring closely.',date:'Jun 14',time:'08:33 PM',sources:4,confidence:82};
+    const confM=this.meter(82,10);
+
+    const maxAct=Math.max.apply(null,this.ACTIVITY.map(dd=>dd.count));
+    const activityRows=this.ACTIVITY.map(dd=>{const f=Math.round(dd.count/maxAct*20);return{day:dd.day,count:dd.count,fill:'\u2588'.repeat(f),track:'\u2591'.repeat(20-f)};});
+
+    const stocks=this.STOCKS.map((s,i)=>Object.assign({},s,{chgColor:s.dir==='\u25b2'?'#4ADE80':s.dir==='\u25bc'?'#FC8C8C':'rgba(255,255,255,0.6)',borderRight:i<this.STOCKS.length-1?'1px solid rgba(255,255,255,0.07)':'none'}));
+
+    const W2=this.state.widgets;
+    const wd=k=>W2[k]?'block':'none';
+    const widgetCards=Object.keys(this.WIDGET_DEFS).map(k=>{const def=this.WIDGET_DEFS[k];return{key:k,label:def.label,desc:def.desc,active:W2[k],glyph:W2[k]?'[x]':'[ ]',color:W2[k]?'rgba(255,255,255,0.92)':'rgba(255,255,255,0.42)',onClick:this.toggleWidget(k)};});
+
+    const newslettersTop=this.NEWSLETTERS.slice(0,2).map((n,i)=>Object.assign({},n,{change0:n.changes[0]||'',change1:n.changes[1]||'',animDelay:(i*0.1)+'s'}));
+    const patentsTop=this.PATENTS.slice(0,2);
+    const newsletters=this.NEWSLETTERS.map((n,i)=>Object.assign({},n,{change0:n.changes[0]||'',change1:n.changes[1]||'',change2:n.changes[2]||'',animDelay:(i*0.08)+'s'}));
+    const insider=this.INSIDER.map((i2,i)=>Object.assign({},i2,{sevColor:i2.sev==='\u25b2'?'rgba(255,255,255,0.9)':'rgba(255,255,255,0.28)',animDelay:(i*0.06)+'s'}));
+    const patents=this.PATENTS.map((p,i)=>Object.assign({},p,{animDelay:(i*0.06)+'s'}));
+    const investments=this.INVESTMENTS.map((i2,i)=>Object.assign({},i2,{animDelay:(i*0.07)+'s'}));
+
+    const nw=this.state.nw;
+    const typeOptions=['company','person','ticker'].map(t=>({id:t,label:t,glyph:nw.type===t?'(\u25cf)':'( )',color:nw.type===t?'rgba(255,255,255,0.92)':'rgba(255,255,255,0.38)',onClick:this.setType(t)}));
+    const cadLabel=this.CADENCE[nw.cadence];
+
+    const agentConfig=this.state.agentConfig;
+    const agentLog=this.state.agentLog.map(m=>Object.assign({},m,{isUser:m.role==='user',isAgent:m.role==='agent'}));
+    const agentReady=this.state.agentStage===3;
+    const agentDone=this.state.agentStage===4;
+    const agentHasTarget=!!agentConfig.url;
+    const agentHasSignals=!!(agentConfig.signals&&agentConfig.signals.length);
+    const agentSignals=agentHasSignals?agentConfig.signals.map(s=>({name:s.toUpperCase(),color:this.TYPE_COLOR[s]||'rgba(255,255,255,0.6)'})):[];
+    const agentShowSettings=this.state.agentStage>=3&&!!(agentConfig.cadence);
+
+    const insightTab=this.state.insightTab;
+    const insightTabs=['stock','patents','newsletters','insider','investments'].map(t=>({id:t,label:t.toUpperCase(),active:t===insightTab,color:t===insightTab?'rgba(255,255,255,0.95)':'rgba(255,255,255,0.32)',border:t===insightTab?'1px solid rgba(255,255,255,0.48)':'1px solid transparent',onClick:()=>this.setState({insightTab:t})}));
+
+    const notifRows=[
+      {label:'PRICING',color:this.TYPE_COLOR.pricing,email:'[x]',slack:'[ ]',digest:'[x]'},
+      {label:'HIRING',color:this.TYPE_COLOR.hiring,email:'[x]',slack:'[ ]',digest:'[x]'},
+      {label:'INSIDER',color:this.TYPE_COLOR.insider,email:'[x]',slack:'[x]',digest:'[x]'},
+      {label:'NEWSLETTER',color:this.TYPE_COLOR.newsletter,email:'[x]',slack:'[ ]',digest:'[ ]'},
+      {label:'PATENT',color:this.TYPE_COLOR.patent,email:'[ ]',slack:'[ ]',digest:'[x]'},
+      {label:'STOCK',color:this.TYPE_COLOR.stock,email:'[x]',slack:'[x]',digest:'[ ]'},
+    ];
+
+    return {
+      isOverview:view==='overview',isAnalytics:view==='analytics',isWatchlists:view==='watchlists',
+      isSignals:view==='signals',isInsights:view==='insights',isAgent:view==='agent',
+      isAsk:view==='ask',isSettings:view==='settings',isNew:view==='new',
+      clock,navItems,goNew:this.go('new'),goSettings:this.go('settings'),
+      animSignals,animWatches,animLive,animSpend,
+      activityChart:this._charts.sm,activityChartLg:this._charts.lg,
+      watchlists:wl,signalsTop:sigTop,signalsAll:filtered,signalCount:filtered.length,filters,
+      sparkChars,typeBars,brief,confFill:confM.fill,confTrack:confM.track,
+      wdAnalytics:wd('analytics'),wdWatchlists:wd('watchlists'),wdSignals:wd('signals'),wdBrief:wd('brief'),
+      wdStock:wd('stock'),wdNewsletters:wd('newsletters'),wdPatents:wd('patents'),wdInsider:wd('insider'),
+      configuring:this.state.configuring,widgetCards,toggleConfigure:()=>this.setState(s=>({configuring:!s.configuring})),
+      stocks,activityRows,scanLog:this.SCAN_LOG,
+      isStock:insightTab==='stock',isPatents:insightTab==='patents',isNewsletters:insightTab==='newsletters',isInsider:insightTab==='insider',isInvestments:insightTab==='investments',
+      insightTabs,insider,investments,newsletters,patents,patentsCount:this.PATENTS.length,
+      newslettersTop,patentsTop,
+      typeOptions,cadLabel,nwUrl:nw.url,nwBudget:nw.budget,
+      nwEmail:nw.email?'[x]':'[ ]',nwSlack:nw.slack?'[x]':'[ ]',nwCreated:nw.created,
+      nwEmailColor:nw.email?'rgba(255,255,255,0.85)':'rgba(255,255,255,0.38)',
+      nwSlackColor:nw.slack?'rgba(255,255,255,0.85)':'rgba(255,255,255,0.38)',
+      onUrl:this.onUrl,onBudget:this.onBudget,setEmail:this.toggle('email'),setSlack:this.toggle('slack'),
+      cadencePrev:this.cadenceStep(-1),cadenceNext:this.cadenceStep(1),createWatch:this.createWatch,
+      nwSummary:(nw.url||'your source')+' \u00b7 '+cadLabel,
+      agentLog,agentInput:this.state.agentInput,onAgentChange:this.onAgentChange,onAgentKey:this.onAgentKey,
+      agentHasTarget,agentHasSignals,agentSignals,agentEmptyRight:!agentHasTarget,
+      agentShowSettings,agentShowDeploy:agentReady&&!agentDone,agentShowDone:agentDone,agentDeploy:this.agentDeploy,
+      agentTarget:agentConfig.name||agentConfig.url||'\u2014',agentUrl:agentConfig.url||'\u2014',agentType:agentConfig.type||'company',
+      agentCadence:agentConfig.cadence||'\u2014',agentBudget:agentConfig.budget||'0.00',
+      askInput:this.state.askInput,onAskChange:this.onAskChange,onAskKey:this.onAskKey,
+      askLog:this.state.askLog.map(m=>Object.assign({},m,{isYou:m.role==='you',isVigil:m.role==='vigil',isSys:m.role==='sys'})),
+      notifRows,
+    };
+  }
+}
+</script>
+</body>
+</html>

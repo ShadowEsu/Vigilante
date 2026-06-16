@@ -1,0 +1,4 @@
+// Copy to Config.xcconfig and set values before archiving for App Store.
+SUPABASE_URL = https:/$()/your-project.supabase.co
+SUPABASE_ANON_KEY = your-anon-key
+API_BASE_URL = https:/$()/your-vigil-app.vercel.app

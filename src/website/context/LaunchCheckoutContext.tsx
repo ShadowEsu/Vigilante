@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { PROMO_CODES } from "@/lib/billing/promo";
 import { quotePlan, type PlanTier, type PricingQuote } from "@/lib/billing/plans";
 import { withBasePath } from "@/lib/paths";
 import { applyPromoClient, fetchPromoMeta } from "@/lib/waitlist/client";
@@ -29,9 +30,13 @@ interface LaunchCheckoutContextValue {
 const LaunchCheckoutContext = createContext<LaunchCheckoutContextValue | null>(null);
 
 export function LaunchCheckoutProvider({ children }: { children: React.ReactNode }) {
-  const [plan, setPlan] = useState<PlanTier>("free");
-  const [promoInput, setPromoInput] = useState("");
-  const [promo, setPromo] = useState<PromoState | null>(null);
+  const [plan, setPlan] = useState<PlanTier>("growth");
+  const [promoInput, setPromoInput] = useState(PROMO_CODES.VIGILANTE.code);
+  const [promo, setPromo] = useState<PromoState | null>({
+    code: PROMO_CODES.VIGILANTE.code,
+    percentOff: PROMO_CODES.VIGILANTE.percentOff,
+    label: PROMO_CODES.VIGILANTE.label,
+  });
   const [promoError, setPromoError] = useState<string | null>(null);
   const [promoLoading, setPromoLoading] = useState(false);
   const [foundingRemaining, setFoundingRemaining] = useState(100);

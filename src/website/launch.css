@@ -86,6 +86,36 @@
   flex-shrink: 0;
 }
 
+.launch-hero-offer {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+
+.launch-hero-offer-main {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border: 1px solid rgba(74, 222, 128, 0.45);
+  background: rgba(74, 222, 128, 0.1);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: #4ade80;
+}
+
+.launch-hero-offer-promo {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.launch-hero-offer-promo strong {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+}
+
 .launch-plan-picker {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -100,6 +130,7 @@
 }
 
 .launch-plan-option {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -124,6 +155,28 @@
   border-color: rgba(110, 155, 230, 0.55);
   background: rgba(110, 155, 230, 0.08);
   box-shadow: 0 0 28px rgba(110, 155, 230, 0.12);
+}
+
+.launch-plan-option--featured {
+  border-color: rgba(74, 222, 128, 0.35);
+  background: rgba(74, 222, 128, 0.04);
+}
+
+.launch-plan-option--featured.launch-plan-option--selected {
+  border-color: rgba(74, 222, 128, 0.55);
+  background: rgba(74, 222, 128, 0.1);
+  box-shadow: 0 0 28px rgba(74, 222, 128, 0.12);
+}
+
+.launch-plan-featured-tag {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  color: #4ade80;
+  white-space: nowrap;
 }
 
 .launch-plan-option-price {

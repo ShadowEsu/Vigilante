@@ -6,7 +6,7 @@ import { LAUNCH } from "../copy";
 import { useLaunchCheckout } from "../context/LaunchCheckoutContext";
 import { useInView } from "../hooks/useInView";
 
-const SELECTABLE: PlanTier[] = ["free", "growth", "team"];
+const SELECTABLE: PlanTier[] = ["growth", "free", "team"];
 
 function formatDue(plan: PlanTier, due: number) {
   if (plan === "custom") return "Custom";
@@ -42,13 +42,17 @@ export function PricingSection() {
         <h2 style={{ fontSize: "clamp(1.4rem, 3vw, 1.85rem)", fontWeight: 600, margin: "0 0 12px", letterSpacing: "-0.02em", maxWidth: "22ch" }}>
           {LAUNCH.sections.pricingTitle}
         </h2>
-        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.42)", margin: "0 0 20px", maxWidth: "48ch", lineHeight: 1.6 }}>
-          Pick a plan — nothing charged on the waitlist. Billing starts when your workspace opens.
+        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.42)", margin: "0 0 16px", maxWidth: "52ch", lineHeight: 1.6 }}>
+          {LAUNCH.sections.pricingSub}
         </p>
+        <div className="launch-hero-offer" style={{ marginBottom: 20 }}>
+          <span className="launch-hero-offer-main">{LAUNCH.offer.badge}</span>
+          <span className="launch-hero-offer-promo">{LAUNCH.offer.promo}</span>
+        </div>
         {foundingEligible && (
           <div className="launch-founding-banner">
             <span className="launch-founding-pulse" />
-            First {foundingRemaining} signups: <strong>$10/mo credit × 6 months</strong> — applied automatically
+            First {foundingRemaining} signups: <strong>$10/mo credit × 6 months</strong> on top — applied automatically
           </div>
         )}
       </div>
@@ -59,13 +63,15 @@ export function PricingSection() {
           const selected = plan === tier;
           const tierQuote = tier === plan ? quote : null;
           const due = tierQuote?.dueMonthlyUsd ?? def.monthlyUsd ?? 0;
+          const featured = tier === "growth";
           return (
             <button
               key={tier}
               type="button"
-              className={`launch-plan-option ${selected ? "launch-plan-option--selected" : ""}`}
+              className={`launch-plan-option ${selected ? "launch-plan-option--selected" : ""} ${featured ? "launch-plan-option--featured" : ""}`}
               onClick={() => setPlan(tier)}
             >
+              {featured && <div className="launch-plan-featured-tag">MOST POPULAR</div>}
               <div className="launch-plan-option-price">{def.monthlyUsd === 0 ? "$0" : `$${def.monthlyUsd}`}</div>
               <div className="launch-plan-option-label">{def.agents}</div>
               {selected && (
@@ -129,7 +135,7 @@ export function PricingSection() {
           </div>
           {promoError && <p style={{ fontSize: 12, color: "#FC8C8C", margin: "8px 0 0" }}>{promoError}</p>}
           <p style={{ fontSize: 10, color: "rgba(255,255,255,0.28)", margin: "10px 0 0", letterSpacing: "0.04em" }}>
-            Try <button type="button" className="launch-promo-chip" onClick={() => applyPromo("Vigilante")}>VIGILANTE</button> for 50% off
+            <button type="button" className="launch-promo-chip" onClick={() => applyPromo("VIGILANTE")}>VIGILANTE</button> — 50% off 3 AI agents ($5/mo at launch)
           </p>
         </div>
       </div>

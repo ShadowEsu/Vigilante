@@ -4,7 +4,7 @@ export const PROMO_CODES = {
   VIGILANTE: {
     code: "VIGILANTE",
     percentOff: 50,
-    label: "50% off monthly",
+    label: "50% off — 3 AI agents for $5/mo",
   },
 } as const;
 

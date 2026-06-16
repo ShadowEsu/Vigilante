@@ -1,8 +1,10 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { applySecurityHeaders } from "@/lib/security/headers";
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request: { headers: request.headers } });
+  applySecurityHeaders(response.headers, process.env.NODE_ENV === "development");
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -37,13 +39,17 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth";
     url.searchParams.set("redirect", request.nextUrl.pathname);
-    return NextResponse.redirect(url);
+    const redirect = NextResponse.redirect(url);
+    applySecurityHeaders(redirect.headers, process.env.NODE_ENV === "development");
+    return redirect;
   }
 
   if (isAuthRoute && user) {
     const url = request.nextUrl.clone();
     url.pathname = "/app";
-    return NextResponse.redirect(url);
+    const redirect = NextResponse.redirect(url);
+    applySecurityHeaders(redirect.headers, process.env.NODE_ENV === "development");
+    return redirect;
   }
 
   return response;

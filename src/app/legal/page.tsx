@@ -5,16 +5,15 @@ import { LegalPageShell } from "@/components/legal/LegalPage";
 import { LEGAL, LEGAL_LINKS } from "@/lib/legal/config";
 
 import { getLegalDocument } from "@/lib/legal";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 
 
-export const metadata = {
-
-  title: "Legal — Vigilante",
-
-  description: "Terms, privacy, and other legal documents for Vigilante.",
-
-};
+export const metadata = buildPageMetadata({
+  title: "Legal",
+  description: "Terms of service, privacy policy, and legal documents for Vigilante competitive intelligence software.",
+  path: "/legal",
+});
 
 
 

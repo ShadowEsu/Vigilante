@@ -93,3 +93,20 @@ website/supabase/      SQL schema
 ```
 
 Full app docs → switch to the **`Vigilante`** branch.
+
+## SEO & domain authority
+
+Technical SEO is built in:
+
+- `sitemap.xml` and `robots.txt` (auto-generated)
+- JSON-LD: Organization, WebSite, SoftwareApplication, FAQPage, Article
+- Open Graph + Twitter cards
+- `/competitive-intelligence` topical guide (internal links from homepage)
+- `public/llms.txt` for AI/search crawlers
+
+**To improve rankings further (off-site):**
+
+1. [Google Search Console](https://search.google.com/search-console) — add property `https://shadowesu.github.io/Vigilante/` and submit sitemap
+2. Get a custom domain (`vigilant.app`) — stronger site authority than `github.io` subpaths
+3. Earn backlinks from product directories, launch posts (Product Hunt, HN), and CI/industry blogs
+4. Publish more guide content linking back to `/competitive-intelligence`

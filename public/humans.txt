@@ -1,0 +1,7 @@
+/* TEAM */
+Product: Vigilante
+Company: Vigilant Intelligence, Inc.
+Site: https://shadowesu.github.io/Vigilante/
+
+/* THANKS */
+Next.js, Supabase, Vercel

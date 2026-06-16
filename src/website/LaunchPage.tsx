@@ -13,6 +13,7 @@ import { LaunchMarquee } from "./components/LaunchMarquee";
 import { PricingSection } from "./components/PricingSection";
 import { LaunchGrid3d } from "./components/LaunchGrid3d";
 import { LaunchCheckoutProvider } from "./context/LaunchCheckoutContext";
+import { fetchWaitlistCount } from "@/lib/waitlist/client";
 import { LegalFooterLinks } from "@/components/legal/LegalPage";
 
 export function LaunchPage() {
@@ -38,12 +39,7 @@ function LaunchPageInner() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/waitlist")
-      .then((r) => r.json())
-      .then((d) => {
-        if (typeof d.count === "number") setWaitlistCount(d.count);
-      })
-      .catch(() => {});
+    fetchWaitlistCount().then(setWaitlistCount);
   }, []);
 
   return (

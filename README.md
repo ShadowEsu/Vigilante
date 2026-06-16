@@ -13,6 +13,22 @@ Competitive intelligence monitoring — watch competitor pricing, filings, caree
 
 Both branches share the same Next.js codebase; pick the branch that matches what you're deploying or reviewing.
 
+## Live preview (GitHub Pages)
+
+**https://shadowesu.github.io/Vigilante/**
+
+Deployed automatically from the `YC_Vigilante-Website` branch via GitHub Actions.
+
+### Waitlist on GitHub Pages
+
+1. Run `website/supabase/waitlist.sql` and `website/supabase/waitlist-public-count.sql` in Supabase  
+2. Add GitHub repo **Secrets** → Settings → Secrets → Actions:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+3. Re-run the **Deploy website to GitHub Pages** workflow (or push to `YC_Vigilante-Website`)
+
+Signups write directly to Supabase from the browser (no server API on static hosting).
+
 ## Quick start
 
 ```bash

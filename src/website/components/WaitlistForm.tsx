@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { PLANS } from "@/lib/billing/plans";
+import { submitWaitlistSignup } from "@/lib/waitlist/client";
 import { useLaunchCheckout } from "../context/LaunchCheckoutContext";
 
 type WaitlistVariant = "hero" | "footer";
@@ -29,26 +30,14 @@ export function WaitlistForm({
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/waitlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          company: company || undefined,
-          role: role || undefined,
-          plan_tier: plan,
-          promo_code: promo?.code,
-        }),
+      const result = await submitWaitlistSignup({
+        email,
+        company: company || undefined,
+        role: role || undefined,
+        plan_tier: plan,
+        promo_code: promo?.code,
       });
-      const raw = await res.text();
-      let data: { error?: string; quote?: typeof quote } = {};
-      try {
-        data = raw ? (JSON.parse(raw) as { error?: string; quote?: typeof quote }) : {};
-      } catch {
-        throw new Error(res.ok ? "Invalid server response" : "Server error — try again in a moment");
-      }
-      if (!res.ok) throw new Error(data.error ?? "Signup failed");
-      if (data.quote) setConfirmedQuote(data.quote);
+      if (result.quote) setConfirmedQuote(result.quote);
       setDone(true);
       onSuccess?.();
     } catch (err) {

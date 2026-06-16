@@ -2,6 +2,8 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { quotePlan, type PlanTier, type PricingQuote } from "@/lib/billing/plans";
+import { withBasePath } from "@/lib/paths";
+import { applyPromoClient, fetchPromoMeta } from "@/lib/waitlist/client";
 
 interface PromoState {
   code: string;
@@ -36,13 +38,10 @@ export function LaunchCheckoutProvider({ children }: { children: React.ReactNode
   const [foundingEligible, setFoundingEligible] = useState(true);
 
   useEffect(() => {
-    fetch("/api/promo")
-      .then((r) => r.json())
-      .then((d) => {
-        if (typeof d.foundingRemaining === "number") setFoundingRemaining(d.foundingRemaining);
-        if (typeof d.foundingEligible === "boolean") setFoundingEligible(d.foundingEligible);
-      })
-      .catch(() => {});
+    fetchPromoMeta().then((meta) => {
+      setFoundingRemaining(meta.foundingRemaining);
+      setFoundingEligible(meta.foundingEligible);
+    });
   }, []);
 
   const quote = useMemo(
@@ -56,33 +55,49 @@ export function LaunchCheckoutProvider({ children }: { children: React.ReactNode
     [plan, promo, foundingEligible]
   );
 
-  const applyPromo = useCallback(async (overrideCode?: string) => {
-    const code = (overrideCode ?? promoInput).trim();
-    if (overrideCode) setPromoInput(overrideCode);
-    if (!code) {
-      setPromo(null);
+  const applyPromo = useCallback(
+    async (overrideCode?: string) => {
+      const code = (overrideCode ?? promoInput).trim();
+      if (overrideCode) setPromoInput(overrideCode);
+      if (!code) {
+        setPromo(null);
+        setPromoError(null);
+        return;
+      }
+      setPromoLoading(true);
       setPromoError(null);
-      return;
-    }
-    setPromoLoading(true);
-    setPromoError(null);
-    try {
-      const res = await fetch("/api/promo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, plan }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Invalid promo code");
-      setPromo({ code: data.code, percentOff: data.percentOff, label: data.label });
-      if (typeof data.foundingRemaining === "number") setFoundingRemaining(data.foundingRemaining);
-    } catch (err) {
-      setPromo(null);
-      setPromoError(err instanceof Error ? err.message : "Invalid promo code");
-    } finally {
-      setPromoLoading(false);
-    }
-  }, [plan, promoInput]);
+      try {
+        const res = await fetch(withBasePath("/api/promo"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code, plan }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setPromo({ code: data.code, percentOff: data.percentOff, label: data.label });
+          if (typeof data.foundingRemaining === "number") setFoundingRemaining(data.foundingRemaining);
+          return;
+        }
+        const applied = applyPromoClient(code, plan);
+        setPromo({ code: applied.code, percentOff: applied.percentOff, label: applied.label });
+        const meta = await fetchPromoMeta();
+        setFoundingRemaining(meta.foundingRemaining);
+        setFoundingEligible(meta.foundingEligible);
+      } catch (err) {
+        try {
+          const applied = applyPromoClient(code, plan);
+          setPromo({ code: applied.code, percentOff: applied.percentOff, label: applied.label });
+          setPromoError(null);
+        } catch {
+          setPromo(null);
+          setPromoError(err instanceof Error ? err.message : "Invalid promo code");
+        }
+      } finally {
+        setPromoLoading(false);
+      }
+    },
+    [plan, promoInput]
+  );
 
   const clearPromo = useCallback(() => {
     setPromo(null);

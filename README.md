@@ -1,97 +1,76 @@
-# Vigilante
+# YC Vigilante — Website
 
-Competitive intelligence monitoring — watch competitor pricing, filings, careers, and product pages. Daily diffs, sourced briefs, SEC EDGAR.
+Launch site and waitlist for **Vigilante** competitive intelligence.
 
-**Live site:** marketing + waitlist at `/` · full product demo at `/preview`
+This branch is for the **marketing site** (`/`), waitlist, pricing, and interactive terminal demo. The full product app lives on the `Vigilante` branch (same codebase — deploy either or both from one Vercel project).
 
-## Branches
+## What's on this site
 
-| Branch | Purpose |
-|--------|---------|
-| **`Vigilante`** | Full application — intel engine, `/preview` app, APIs, mobile-ready backend |
-| **`YC_Vigilante-Website`** | Launch site focus — waitlist, pricing, YC-style marketing page |
+| Route | What |
+|-------|------|
+| `/` | YC-style launch page — hero, terminal demo, pricing, waitlist |
+| `/preview` | Full product demo (no auth) |
+| `/auth` | Magic-link sign-in |
 
-Both branches share the same Next.js codebase; pick the branch that matches what you're deploying or reviewing.
-
-## Quick start
+## Run locally
 
 ```bash
 npm install
-cp .env.example .env.local   # add Supabase keys for live waitlist
+cp .env.example .env.local
 npm run dev
 ```
 
-- http://localhost:3000 — launch site + interactive terminal demo  
-- http://localhost:3000/preview — full Vigilante app  
-- http://localhost:3000/auth — magic-link sign-in  
+Open http://localhost:3000
 
-## Waitlist (production)
+## Live waitlist setup
 
-The waitlist **must use Supabase in production** (Vercel/serverless has no persistent local disk).
+**Required for production** — run once in Supabase SQL Editor:
 
-### 1. Create Supabase project
+```
+website/supabase/waitlist.sql
+```
 
-1. [supabase.com](https://supabase.com) → New project  
-2. SQL Editor → run [`website/supabase/waitlist.sql`](website/supabase/waitlist.sql)  
-3. If the table already exists, run [`website/supabase/waitlist-migration-billing.sql`](website/supabase/waitlist-migration-billing.sql)
+Vercel environment variables:
 
-### 2. Environment variables
+```
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_SITE_URL=https://your-domain.vercel.app
+```
 
-Set on Vercel (or `.env.local` for dev):
-
-| Variable | Required | Purpose |
-|----------|----------|---------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Yes (prod) | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes (prod) | Public anon key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Yes (prod) | Server-side waitlist inserts |
-| `NEXT_PUBLIC_SITE_URL` | Recommended | Canonical site URL |
-
-**Do not** use placeholder values in production — the API falls back to local `.data/waitlist.json` only for local dev.
-
-### 3. API
-
-- `GET /api/waitlist` → `{ count }`  
-- `POST /api/waitlist` → `{ email, company?, role?, plan_tier?, promo_code? }`  
-- `GET /api/promo` → founding slots + promo hints  
-- `POST /api/promo` → validate code (e.g. `VIGILANTE` = 50% off)
-
-### 4. Verify
+Test signup:
 
 ```bash
-curl -X POST https://your-domain.vercel.app/api/waitlist \
+curl -X POST $SITE/api/waitlist \
   -H "Content-Type: application/json" \
-  -d '{"email":"you@company.com","plan_tier":"free"}'
+  -d '{"email":"test@example.com","plan_tier":"growth","promo_code":"VIGILANTE"}'
 ```
 
-## Deploy (Vercel)
+Expected: `{ "ok": true, "quote": { ... } }`
+
+Without Supabase, signups save to `.data/waitlist.json` **local dev only**.
+
+## Promo
+
+- First **100** waitlist signups → **$10/mo credit for 6 months**  
+- Code **`VIGILANTE`** → **50% off** (apply on pricing section)
+
+## Deploy
 
 ```bash
-npx vercel
+npx vercel --prod
 ```
 
-Add env vars in Vercel → Settings → Environment Variables, then redeploy.
+Point your domain at the Vercel project. Waitlist goes live once Supabase env vars are set.
 
-## Stack
-
-- **Next.js 14** — App Router  
-- **Supabase** — auth, waitlist, data  
-- **Anthropic / Serper** — intel pipeline (optional for demo)  
-
-## Structure
+## Files
 
 ```
-src/website/     Launch page, waitlist, pricing, terminal demo
-src/vigil/       Product UI (/preview)
-src/app/api/     waitlist, promo, companies, intel APIs
-website/         Supabase SQL + launch docs
+src/website/           LaunchPage, WaitlistForm, PricingSection, ProductShowcase
+src/app/api/waitlist   POST/GET signup API
+src/app/api/promo      Promo validation
+website/supabase/      SQL schema
 ```
 
-## Promo & pricing
-
-- **First 100 signups:** $10/mo credit × 6 months (auto-applied)  
-- **Code `VIGILANTE`:** 50% off monthly plan  
-- Plans: Free (2 agents) · $10/mo (3–5) · $20/mo (6+) · Custom  
-
-## License
-
-MIT — see repository license.
+Full app docs → switch to the **`Vigilante`** branch.

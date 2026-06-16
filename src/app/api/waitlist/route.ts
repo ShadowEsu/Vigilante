@@ -9,6 +9,30 @@ export const dynamic = "force-dynamic";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const VALID_PLANS: PlanTier[] = ["free", "growth", "team", "custom"];
 
+const CORS_ORIGINS = [
+  "https://shadowesu.github.io",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+];
+
+function corsHeaders(request: Request) {
+  const origin = request.headers.get("origin") ?? "";
+  const allowed = CORS_ORIGINS.some((o) => origin === o || origin.startsWith(`${o}/`));
+  if (!allowed) return {};
+  return {
+    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+  };
+}
+
+function jsonWithCors(request: Request, body: unknown, init?: ResponseInit) {
+  return NextResponse.json(body, {
+    ...init,
+    headers: { ...corsHeaders(request), ...(init?.headers ?? {}) },
+  });
+}
+
 function hasLiveSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
@@ -28,12 +52,16 @@ async function getSignupCount(): Promise<number> {
   return countWaitlistLocal();
 }
 
-export async function GET() {
+export async function OPTIONS(request: Request) {
+  return new NextResponse(null, { status: 204, headers: corsHeaders(request) });
+}
+
+export async function GET(request: Request) {
   try {
     const local = await countWaitlistLocal();
-    return NextResponse.json({ count: local + 412 });
+    return jsonWithCors(request, { count: local + 412 });
   } catch {
-    return NextResponse.json({ count: 412 });
+    return jsonWithCors(request, { count: 412 });
   }
 }
 
@@ -49,7 +77,7 @@ export async function POST(request: Request) {
 
     const email = body.email?.trim().toLowerCase() ?? "";
     if (!EMAIL_RE.test(email)) {
-      return NextResponse.json({ ok: false, error: "Valid email required" }, { status: 400 });
+      return jsonWithCors(request, { ok: false, error: "Valid email required" }, { status: 400 });
     }
 
     const company = body.company?.trim().slice(0, 120) || null;
@@ -67,7 +95,7 @@ export async function POST(request: Request) {
     if (body.promo_code?.trim()) {
       const promo = validatePromoCode(body.promo_code);
       if (!promo.valid) {
-        return NextResponse.json({ ok: false, error: promo.error }, { status: 400 });
+        return jsonWithCors(request, { ok: false, error: promo.error }, { status: 400 });
       }
       discount_percent = promo.percentOff ?? 0;
       promo_code = promo.code ?? null;
@@ -80,7 +108,8 @@ export async function POST(request: Request) {
     });
 
     if (process.env.NODE_ENV === "production" && !hasLiveSupabase()) {
-      return NextResponse.json(
+      return jsonWithCors(
+        request,
         {
           ok: false,
           error: "Waitlist storage not configured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY on your host.",
@@ -107,12 +136,12 @@ export async function POST(request: Request) {
 
       if (error) {
         if (error.code === "23505") {
-          return NextResponse.json({ ok: true, duplicate: true });
+          return jsonWithCors(request, { ok: true, duplicate: true, quote });
         }
         throw error;
       }
 
-      return NextResponse.json({
+      return jsonWithCors(request, {
         ok: true,
         storage: "supabase",
         quote,
@@ -132,7 +161,7 @@ export async function POST(request: Request) {
       due_monthly_usd: quote.dueMonthlyUsd,
     });
 
-    return NextResponse.json({
+    return jsonWithCors(request, {
       ok: true,
       storage: "local",
       quote,
@@ -141,8 +170,8 @@ export async function POST(request: Request) {
   } catch (err) {
     const message = err instanceof Error ? err.message : "Waitlist signup failed";
     if (message.includes("Already on")) {
-      return NextResponse.json({ ok: true, duplicate: true });
+      return jsonWithCors(request, { ok: true, duplicate: true });
     }
-    return NextResponse.json({ ok: false, error: message }, { status: 500 });
+    return jsonWithCors(request, { ok: false, error: message }, { status: 500 });
   }
 }

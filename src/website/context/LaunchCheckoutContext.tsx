@@ -31,7 +31,7 @@ const LaunchCheckoutContext = createContext<LaunchCheckoutContextValue | null>(n
 
 export function LaunchCheckoutProvider({ children }: { children: React.ReactNode }) {
   const [plan, setPlan] = useState<PlanTier>("growth");
-  const [promoInput, setPromoInput] = useState(PROMO_CODES.VIGILANTE.code);
+  const [promoInput, setPromoInput] = useState<string>(PROMO_CODES.VIGILANTE.code);
   const [promo, setPromo] = useState<PromoState | null>({
     code: PROMO_CODES.VIGILANTE.code,
     percentOff: PROMO_CODES.VIGILANTE.percentOff,

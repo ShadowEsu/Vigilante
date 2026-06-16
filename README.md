@@ -1,8 +1,16 @@
 # Vigilante
 
+[![Website](https://img.shields.io/badge/website-live-4ADE80?style=for-the-badge)](https://shadowesu.github.io/Vigilante/)
+[![Demo](https://img.shields.io/badge/demo-try%20now-6E9BE6?style=for-the-badge)](https://shadowesu.github.io/Vigilante/preview)
+[![Waitlist](https://img.shields.io/badge/waitlist-join-000?style=for-the-badge)](https://shadowesu.github.io/Vigilante/#waitlist)
+
+**[Vigilante](https://shadowesu.github.io/Vigilante/)** — AI competitive intelligence. Three agents monitor competitor pricing, SEC filings, and hiring pages. Daily diffs and sourced briefs from **$10/mo**.
+
+> **Link to us:** [Press kit](https://shadowesu.github.io/Vigilante/press) · [Tool comparison](https://shadowesu.github.io/Vigilante/resources/competitive-intelligence-tools) · [CI guide](https://shadowesu.github.io/Vigilante/competitive-intelligence)
+
 Competitive intelligence monitoring — watch competitor pricing, filings, careers, and product pages. Daily diffs, sourced briefs, SEC EDGAR.
 
-**Live site:** marketing + waitlist at `/` · full product demo at `/preview`
+**Live site:** [vigilante.app launch](https://shadowesu.github.io/Vigilante/) · full product demo at [`/preview`](https://shadowesu.github.io/Vigilante/preview)
 
 ## Branches
 

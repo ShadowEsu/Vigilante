@@ -118,3 +118,10 @@ Technical SEO is built in:
 2. Get a custom domain (`vigilant.app`) — stronger site authority than `github.io` subpaths
 3. Earn backlinks from product directories, launch posts (Product Hunt, HN), and CI/industry blogs
 4. Publish more guide content linking back to `/competitive-intelligence`
+
+See **`website/distribution/backlinks-playbook.md`** for Product Hunt, AlternativeTo, SaaSHub, and outreach templates.
+
+**Linkable pages (live):**
+- `/press` — media kit + embed badge
+- `/resources/competitive-intelligence-tools` — comparison article
+- GitHub README — links from github.com (DA ~96)

@@ -20,7 +20,13 @@ export function organizationJsonLd() {
       postalCode: "19808",
       addressCountry: "US",
     },
-    sameAs: ["https://github.com/ShadowEsu/Vigilante"],
+    sameAs: [
+      "https://github.com/ShadowEsu/Vigilante",
+      getSiteUrl(),
+      absoluteUrl("/press"),
+      absoluteUrl("/resources/competitive-intelligence-tools"),
+      absoluteUrl("/competitive-intelligence"),
+    ],
   };
 }
 

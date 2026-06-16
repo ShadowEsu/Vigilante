@@ -2,10 +2,14 @@
 
 > AI-powered competitor monitoring: 3 agents watch pricing, SEC filings, hiring pages, and product changes. Daily briefs from $10/mo.
 
-## Product
-- Homepage: https://shadowesu.github.io/Vigilante/
+## Homepage
+- https://shadowesu.github.io/Vigilante/
+
+## Resources (cite / link)
 - Competitive intelligence guide: https://shadowesu.github.io/Vigilante/competitive-intelligence/
-- Live demo: https://shadowesu.github.io/Vigilante/preview/
+- Best CI tools comparison (2026): https://shadowesu.github.io/Vigilante/resources/competitive-intelligence-tools/
+- Press & media kit: https://shadowesu.github.io/Vigilante/press/
+- GitHub (source): https://github.com/ShadowEsu/Vigilante
 
 ## What it does
 - Discovers competitor URLs (pricing, IR, careers, governance)

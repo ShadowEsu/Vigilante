@@ -21,8 +21,8 @@ export const PLANS: Record<PlanTier, PlanDef> = {
     id: "growth",
     name: "GROWTH",
     monthlyUsd: 10,
-    agents: "3–5 agents",
-    detail: "Slack alerts, faster scans",
+    agents: "3 AI agents",
+    detail: "Full competitor analysis — discover, diff, brief",
   },
   team: {
     id: "team",

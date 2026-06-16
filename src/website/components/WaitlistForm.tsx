@@ -50,9 +50,16 @@ export function WaitlistForm({
   const dueLabel =
     plan === "custom"
       ? "custom pricing"
-      : confirmedQuote.dueMonthlyUsd === 0
-        ? "$0/mo at launch"
-        : `$${confirmedQuote.dueMonthlyUsd}/mo at launch`;
+      : plan === "growth" && promo
+        ? `$${confirmedQuote.dueMonthlyUsd}/mo · 3 AI agents`
+        : confirmedQuote.dueMonthlyUsd === 0
+          ? "$0/mo at launch"
+          : `$${confirmedQuote.dueMonthlyUsd}/mo at launch`;
+
+  const ctaLabel =
+    plan === "growth" && promo
+      ? `[ JOIN — 3 AI AGENTS · $${confirmedQuote.dueMonthlyUsd}/MO ]`
+      : "[ JOIN WAITLIST ]";
 
   if (done) {
     return (
@@ -138,7 +145,7 @@ export function WaitlistForm({
             width: isFooter ? "100%" : "auto",
           }}
         >
-          {loading ? "…" : "[ JOIN WAITLIST ]"}
+          {loading ? "…" : ctaLabel}
         </button>
         {error && (
           <p style={{ fontSize: 13, color: "#FC8C8C", margin: 0, width: "100%", textAlign: isFooter ? "center" : "left" }}>

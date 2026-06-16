@@ -65,8 +65,9 @@ Without Supabase, signups save to `.data/waitlist.json` **local dev only**.
 
 ## Promo
 
-- First **100** waitlist signups → **$10/mo credit for 6 months**  
-- Code **`VIGILANTE`** → **50% off** (apply on pricing section)
+- **3 AI agents · $10/mo** — the core plan for competitor analysis  
+- Code **`VIGILANTE`** → **50% off** ($5/mo for 3 AI agents)  
+- First **100** waitlist signups → **$10/mo credit × 6 months** on top
 
 ## Deploy
 

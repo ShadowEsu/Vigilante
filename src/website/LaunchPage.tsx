@@ -76,8 +76,12 @@ function LaunchPageInner() {
           <div className="launch-hero-glow" />
 
           <div className={`launch-reveal ${hero.visible ? "launch-reveal--visible" : ""}`}>
+            <div className="launch-hero-offer" style={{ marginBottom: 20 }}>
+              <span className="launch-hero-offer-main">{LAUNCH.offer.badge}</span>
+              <span className="launch-hero-offer-promo">{LAUNCH.offer.promo}</span>
+            </div>
             <div style={{ fontSize: 11, letterSpacing: "0.18em", color: "rgba(255,255,255,0.38)", marginBottom: 20 }}>
-              {waitlistCount.toLocaleString()} ON THE WAITLIST
+              {waitlistCount.toLocaleString()} ON THE WAITLIST · {LAUNCH.offer.edge}
             </div>
             <h1
               style={{

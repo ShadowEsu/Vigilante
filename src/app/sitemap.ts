@@ -2,6 +2,8 @@ import type { MetadataRoute } from "next";
 import { LEGAL_SLUGS } from "@/lib/legal";
 import { absoluteUrl } from "@/lib/seo/site";
 
+export const dynamic = "force-static";
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
   const pages: MetadataRoute.Sitemap = [

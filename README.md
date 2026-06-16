@@ -4,6 +4,8 @@
 
 Launch site and waitlist for **Vigilante** competitive intelligence.
 
+> **Link to us:** [Press kit](https://shadowesu.github.io/Vigilante/press) · [Tool comparison](https://shadowesu.github.io/Vigilante/resources/competitive-intelligence-tools) · [CI guide](https://shadowesu.github.io/Vigilante/competitive-intelligence)
+
 This branch is for the **marketing site** (`/`), waitlist, pricing, and interactive terminal demo. The full product app lives on the `Vigilante` branch (same codebase — deploy either or both from one Vercel project).
 
 ## What's on this site
@@ -13,6 +15,9 @@ This branch is for the **marketing site** (`/`), waitlist, pricing, and interact
 | `/` | YC-style launch page — hero, terminal demo, pricing, waitlist |
 | `/preview` | Full product demo (no auth) |
 | `/auth` | Magic-link sign-in |
+| `/press` | Media kit + embed badge (backlinks) |
+| `/resources/competitive-intelligence-tools` | CI tools comparison (linkable) |
+| `/competitive-intelligence` | Educational guide |
 
 ## Run locally
 

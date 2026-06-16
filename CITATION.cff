@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+title: Vigilante
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - name: Vigilant Intelligence, Inc.
+repository-code: "https://github.com/ShadowEsu/Vigilante"
+url: "https://shadowesu.github.io/Vigilante/"
+abstract: "AI competitive intelligence platform — monitor competitor pricing, SEC filings, and hiring with multi-agent analysis."

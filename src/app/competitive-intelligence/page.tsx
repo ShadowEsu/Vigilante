@@ -104,6 +104,8 @@ export default function CompetitiveIntelligencePage() {
 
           <nav style={{ marginTop: 48, fontSize: 11, color: "rgba(255,255,255,0.35)" }} aria-label="Related">
             <Link href="/" style={{ color: "rgba(255,255,255,0.5)", marginRight: 16 }}>Home</Link>
+            <Link href="/resources/competitive-intelligence-tools" style={{ color: "rgba(255,255,255,0.5)", marginRight: 16 }}>Tool comparison</Link>
+            <Link href="/press" style={{ color: "rgba(255,255,255,0.5)", marginRight: 16 }}>Press</Link>
             <Link href="/legal/privacy" style={{ color: "rgba(255,255,255,0.5)", marginRight: 16 }}>Privacy</Link>
             <Link href="/legal/terms" style={{ color: "rgba(255,255,255,0.5)" }}>Terms</Link>
           </nav>

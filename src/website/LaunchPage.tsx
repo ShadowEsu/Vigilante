@@ -211,7 +211,13 @@ function LaunchPageInner() {
         <footer style={{ padding: "32px 28px 48px", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
           <nav style={{ textAlign: "center", marginBottom: 16, fontSize: 10, letterSpacing: "0.1em" }} aria-label="Footer">
             <Link href="/competitive-intelligence" style={{ color: "rgba(255,255,255,0.35)", marginRight: 16, textDecoration: "none" }}>
-              Competitive Intelligence Guide
+              CI Guide
+            </Link>
+            <Link href="/resources/competitive-intelligence-tools" style={{ color: "rgba(255,255,255,0.35)", marginRight: 16, textDecoration: "none" }}>
+              Tool Comparison
+            </Link>
+            <Link href="/press" style={{ color: "rgba(255,255,255,0.35)", marginRight: 16, textDecoration: "none" }}>
+              Press
             </Link>
             <Link href="/legal" style={{ color: "rgba(255,255,255,0.35)", marginRight: 16, textDecoration: "none" }}>
               Legal

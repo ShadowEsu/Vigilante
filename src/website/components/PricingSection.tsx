@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { formatUsdMonthly } from "@/lib/billing/format-price";
 import { PLANS, type PlanTier } from "@/lib/billing/plans";
 import { LAUNCH } from "../copy";
 import { useLaunchCheckout } from "../context/LaunchCheckoutContext";
@@ -10,8 +11,7 @@ const SELECTABLE: PlanTier[] = ["growth", "free", "team"];
 
 function formatDue(plan: PlanTier, due: number) {
   if (plan === "custom") return "Custom";
-  if (due === 0) return "$0";
-  return `$${due}`;
+  return formatUsdMonthly(due);
 }
 
 export function PricingSection() {
@@ -72,11 +72,13 @@ export function PricingSection() {
               onClick={() => setPlan(tier)}
             >
               {featured && <div className="launch-plan-featured-tag">MOST POPULAR</div>}
-              <div className="launch-plan-option-price">{def.monthlyUsd === 0 ? "$0" : `$${def.monthlyUsd}`}</div>
+              <div className="launch-plan-option-price">
+                {def.monthlyUsd === null ? "—" : def.monthlyUsd === 0 ? "$0" : `$${def.monthlyUsd}`}
+              </div>
               <div className="launch-plan-option-label">{def.agents}</div>
               {selected && (
                 <div className="launch-plan-option-due">
-                  due at launch: {formatDue(tier, due)}/mo
+                  due at launch: {formatDue(tier, due)}
                 </div>
               )}
             </button>
@@ -142,7 +144,7 @@ export function PricingSection() {
 
       <div style={{ marginTop: 20, textAlign: "center" }}>
         <Link href="#waitlist" className="btn-primary" style={{ textDecoration: "none", fontSize: 12 }}>
-          [ JOIN WAITLIST — {formatDue(plan, quote.dueMonthlyUsd)}/mo AT LAUNCH ]
+          [ JOIN WAITLIST — {formatDue(plan, quote.dueMonthlyUsd).toUpperCase()} AT LAUNCH ]
         </Link>
       </div>
     </section>

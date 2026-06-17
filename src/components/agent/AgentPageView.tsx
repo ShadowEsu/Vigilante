@@ -136,7 +136,7 @@ export function WatcherPageView(_props: WatcherPageViewProps) {
             </div>
             <div>
               <div className="text-[10px] tracking-widest text-muted mb-2">BUDGET</div>
-              <div className="text-dim">$3.00 / month</div>
+              <div className="text-dim">$3/mo</div>
             </div>
             <Link
               href="/preview"

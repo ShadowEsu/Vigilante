@@ -6,15 +6,11 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const pipeline = pipelineStatus();
   return apiOk({
-    ai: pipeline.features.ai,
-    search: pipeline.features.search,
-    sec: pipeline.features.sec,
-    storage: pipeline.storage.mode,
-    version: pipeline.version,
-    pipeline: pipeline.pipeline,
+    status: "ok",
     product: "VIGILANTE",
     entity: "Vigilant Intelligence, Inc.",
-    features: pipeline.features,
-    models: pipeline.models,
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    pipeline,
   });
 }

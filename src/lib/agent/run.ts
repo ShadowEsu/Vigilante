@@ -1,4 +1,6 @@
 import { createServiceClient } from "@/lib/supabase/admin";
+import { eventId } from "@/lib/integrations/events";
+import { dispatchEvent, pipelineVersion } from "@/lib/integrations/notify";
 import { fetchPageText, hashContent } from "./fetch";
 import {
   detectSignals,
@@ -7,6 +9,10 @@ import {
 } from "./llm";
 import { calculateCost } from "./pricing";
 import type { Analysis, DetectedSignal, RunAnalysisResult } from "@/types/database";
+
+function appBaseUrl(): string {
+  return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+}
 
 export async function runAnalysis(analysisId: string): Promise<RunAnalysisResult> {
   const supabase = createServiceClient();
@@ -122,6 +128,41 @@ export async function runAnalysis(analysisId: string): Promise<RunAnalysisResult
     });
 
     briefCreated = true;
+
+    const nowIso = new Date().toISOString();
+    await dispatchEvent({
+      id: eventId(),
+      type: "signals.detected",
+      created_at: nowIso,
+      pipeline_version: pipelineVersion(),
+      data: {
+        target: analysis.target,
+        analysis_id: analysisId,
+        count: allDetected.length,
+        signals: allDetected.map((s) => ({
+          type: s.type,
+          title: s.title,
+          severity: s.severity,
+          source_url: s.source_url,
+        })),
+      },
+    });
+
+    await dispatchEvent({
+      id: eventId(),
+      type: "brief.created",
+      created_at: nowIso,
+      pipeline_version: pipelineVersion(),
+      data: {
+        target: analysis.target,
+        title: briefResult.title,
+        body: briefResult.body,
+        source: "analysis",
+        analysis_id: analysisId,
+        signal_count: allDetected.length,
+        url: `${appBaseUrl()}/app`,
+      },
+    });
   }
 
   let totalCost = 0;
@@ -154,15 +195,26 @@ export async function runAnalysis(analysisId: string): Promise<RunAnalysisResult
     })
     .eq("id", analysisId);
 
-  return {
+  const result: RunAnalysisResult = {
     ok: true,
     signalsCreated: allDetected.length,
     briefCreated,
     baselineCreated,
   };
-}
 
-// Phase 2 plug-ins:
-// - Cron: Vercel Cron → POST /api/cron/run due analyses where next_run_at <= now()
-// - Notifications: after brief insert, dispatch to Slack/Discord webhooks (user settings TBD)
-// - Gemini: swap generateBrief() to Google Generative AI SDK when analysis.model starts with "gemini"
+  await dispatchEvent({
+    id: eventId(),
+    type: "analysis.completed",
+    created_at: new Date().toISOString(),
+    pipeline_version: pipelineVersion(),
+    data: {
+      analysis_id: analysisId,
+      target: analysis.target,
+      signals_created: allDetected.length,
+      brief_created: briefCreated,
+      baseline_created: baselineCreated,
+    },
+  });
+
+  return result;
+}

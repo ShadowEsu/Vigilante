@@ -2,30 +2,30 @@ export const LAUNCH = {
   brand: "VIGILANTE",
   offer: {
     badge: "3 AI AGENTS · $10/MO",
-    promo: "VIGILANTE → 50% off first month",
-    edge: "Source-level competitor intel — not news alerts.",
+    promo: "VIGILANTE → 50% off ($5/mo first month)",
+    edge: "Intel kompetitor dari sumber asli — bukan rumor Twitter, cuy.",
   },
   hero: {
     headline: "Know what competitors changed before your team does.",
     subhead:
-      "Three AI agents watch pricing pages, filings, and careers sites — then diff changes and write sourced briefs. Growth plan: $10/mo. Code VIGILANTE cuts it to $5.",
+      "Tiga AI agent nge-track pricing, filings, sama careers — terus bikin brief yang ada sourcenya. Growth: $10/mo. Kode VIGILANTE? $5/mo. Gas.",
   },
   differentiators: [
     {
       title: "THREE AGENTS",
-      body: "Discovery, diffing, and briefing run in parallel — full coverage without spreadsheet archaeology.",
+      body: "Discovery, diffing, and briefing jalan paralel — full coverage tanpa spreadsheet archaeology.",
     },
     {
       title: "PRIMARY SOURCES",
-      body: "Snapshots competitor-owned pages. You see the change at the source, not a blog post about it.",
+      body: "Snapshot halaman milik kompetitor. Lo lihat perubahan di sumbernya, bukan artikel random.",
     },
     {
       title: "REAL DIFFS",
-      body: "Content hashing on day one. Pricing, packaging, and hiring shifts surface on your cadence.",
+      body: "Content hashing dari hari satu. Pricing, packaging, hiring — keluar sesuai jadwal lo.",
     },
     {
       title: "LINKED BRIEFS",
-      body: "Every insight cites a URL or filing. Share with product, sales, or investors with confidence.",
+      body: "Setiap insight ada URL atau filing-nya. Share ke product, sales, investor — no debat.",
     },
   ],
   steps: [
@@ -34,14 +34,14 @@ export const LAUNCH = {
       title: "DISCOVER",
       body: "Agent 1 maps pricing, investor relations, careers, and SEC filings for any company.",
       accent: "#6E9BE6",
-      hint: "Try it in the demo above ↑",
+      hint: "Coba di demo atas ↑",
     },
     {
       num: "02",
       title: "INDEX",
       body: "Agent 2 snapshots every page and ingests EDGAR for public peers.",
       accent: "#A78BFA",
-      hint: "Overview tab after discovery",
+      hint: "Overview tab setelah discovery",
     },
     {
       num: "03",
@@ -55,7 +55,7 @@ export const LAUNCH = {
       title: "BRIEF",
       body: "All three agents produce a daily brief: what changed, why it matters, what to do next.",
       accent: "#4ADE80",
-      hint: "Brief tab in product demo",
+      hint: "Brief tab — mantap",
     },
   ],
   sections: {
@@ -67,7 +67,7 @@ export const LAUNCH = {
     accountsTitle: "One workspace per team.",
     accountsBody: "Magic-link sign-in. Isolated watchlists, briefs, and alerts per account.",
     ctaTitle: "Reserve your spot.",
-    ctaBody: "Early access is waitlist-only. We'll email when your workspace is ready — no charge today.",
+    ctaBody: "Early access waitlist only. Daftar dulu, bayar belakangan — we'll email when your workspace is ready.",
     demoHint: "Live discovery below · Full workspace at",
   },
   pricing: [
@@ -84,7 +84,7 @@ export const LAUNCH = {
       id: "free",
       name: "FREE",
       price: "$0",
-      period: "",
+      period: "/mo",
       agents: "2 agents",
       detail: "Daily diffs, briefs, SEC EDGAR",
       highlight: false,
@@ -145,17 +145,17 @@ export const LAUNCH = {
       "CAREERS SIGNALS",
       "PAGE DIFFS",
       "DAILY BRIEFS",
-      "SOURCE LINKS",
+      "GAS POLL",
       "WATCHLISTS",
       "SLACK ALERTS",
     ],
     rowB: [
       "COMPETITIVE INTEL",
       "10-K · 10-Q · 8-K",
-      "INVESTOR RELATIONS",
+      "NO DEBAT",
       "PACKAGING CHANGES",
       "HIRING VELOCITY",
-      "MULTI-TENANT",
+      "MANTAP",
       "AI AGENTS",
       "PRIMARY SOURCES",
     ],

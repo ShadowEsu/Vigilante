@@ -216,14 +216,25 @@ export async function submitWaitlistSignup(body: {
   role?: string;
   plan_tier: PlanTier;
   promo_code?: string;
+  _honey?: string;
 }) {
   const meta = await resolveWaitlistQuote(body);
+
+  if (body._honey?.trim()) {
+    throw new Error("Signup blocked.");
+  }
+
+  let stored = false;
+  let emailError: Error | null = null;
 
   if (waitlistPostUrl()) {
     try {
       const result = await submitViaApi(body);
-      await submitWaitlistToFormSubmit(body, result.quote ?? meta.quote).catch(() => undefined);
-      return { quote: result.quote ?? meta.quote };
+      if (typeof window !== "undefined") {
+        const bump = Number(localStorage.getItem("vigilante_waitlist_bump") || 0) + 1;
+        localStorage.setItem("vigilante_waitlist_bump", String(bump));
+      }
+      return { quote: result.quote ?? meta.quote, emailSent: true };
     } catch (err) {
       if (!(err instanceof WaitlistApiUnavailable) && err instanceof Error && err.name !== "WaitlistApiUnavailable") {
         throw err;
@@ -231,14 +242,29 @@ export async function submitWaitlistSignup(body: {
     }
   }
 
-  await submitWaitlistToFormSubmit(body, meta.quote);
-
   if (hasBrowserSupabase()) {
     try {
       await submitViaSupabase(body, meta);
-    } catch {
-      /* FormSubmit already delivered the signup */
+      stored = true;
+    } catch (err) {
+      if (!stored && err instanceof Error) {
+        const msg = err.message;
+        if (!msg.includes("permissions") && !msg.includes("table missing")) {
+          throw err;
+        }
+      }
     }
+  }
+
+  try {
+    await submitWaitlistToFormSubmit(body, meta.quote);
+  } catch (err) {
+    emailError = err instanceof Error ? err : new Error("Waitlist email failed");
+    if (!stored) throw emailError;
+  }
+
+  if (!stored && emailError) {
+    throw emailError;
   }
 
   if (typeof window !== "undefined") {
@@ -246,5 +272,5 @@ export async function submitWaitlistSignup(body: {
     localStorage.setItem("vigilante_waitlist_bump", String(bump));
   }
 
-  return { quote: meta.quote };
+  return { quote: meta.quote, emailSent: !emailError };
 }

@@ -7,6 +7,8 @@ import {
   isNewsletterUrl,
 } from "@/lib/agent/newsletter";
 import { generateBrief } from "@/lib/agent/llm";
+import { eventId } from "@/lib/integrations/events";
+import { dispatchEvent, pipelineVersion } from "@/lib/integrations/notify";
 import { buildIntelBrief, pageIntelFromScrape } from "@/lib/agent/brief-build";
 import { extractIntelFromText } from "@/lib/agent/intel-extract";
 import { fetchRecentFilings } from "@/lib/agent/sec";
@@ -33,6 +35,10 @@ function formatLogTime(d: Date) {
     date: d.toLocaleDateString("en-US", { month: "short", day: "2-digit" }),
     time: d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }),
   };
+}
+
+function appBaseUrl(): string {
+  return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
 }
 
 function sourceCategory(url: string): string {
@@ -98,7 +104,8 @@ export async function runCompanyScrape(
   let insiderMovesFound = 0;
   let changesFound = 0;
   let sourcesScraped = 0;
-  let briefGenerated = false;
+    let briefGenerated = false;
+    let lastBrief: { title: string; body: string } | null = null;
   let costUsd = 0;
   const changeSummaries: DetectedSignal[] = [];
   const pendingChanges: Omit<PageChange, "id">[] = [];
@@ -311,6 +318,7 @@ export async function runCompanyScrape(
           insiderCount: insiderMovesFound,
           highlights: highlightPayload,
         });
+        lastBrief = { title: intelBrief.title, body: intelBrief.body };
         await saveBrief({
           company_id: companyId,
           title: intelBrief.title,
@@ -324,6 +332,7 @@ export async function runCompanyScrape(
       } else if (process.env.ANTHROPIC_API_KEY) {
         try {
           const brief = await generateBrief(changeSummaries, company.name, "claude-sonnet");
+          lastBrief = { title: brief.title, body: brief.body };
           await saveBrief({
             company_id: companyId,
             title: brief.title,
@@ -347,6 +356,7 @@ export async function runCompanyScrape(
             insiderCount: insiderMovesFound,
             highlights: highlightPayload,
           });
+          lastBrief = { title: intelBrief.title, body: intelBrief.body };
           await saveBrief({
             company_id: companyId,
             title: intelBrief.title,
@@ -360,6 +370,7 @@ export async function runCompanyScrape(
         }
       } else {
         const summaryBody = changeSummaries.map((c) => c.detail).join(" ");
+        lastBrief = { title: `${company.name} — Intel Update`, body: summaryBody };
         await saveBrief({
           company_id: companyId,
           title: `${company.name} — Intel Update`,
@@ -398,6 +409,40 @@ export async function runCompanyScrape(
 
     steps.push(`Watchlist: ${company.name} is live — ${findings} intel items indexed`);
     steps.push(`Done — open Overview or Changes Feed to review`);
+
+    const nowIso = now.toISOString();
+    if (briefGenerated && lastBrief) {
+      await dispatchEvent({
+        id: eventId(),
+        type: "brief.created",
+        created_at: nowIso,
+        pipeline_version: pipelineVersion(),
+        data: {
+          target: company.name,
+          title: lastBrief.title,
+          body: lastBrief.body,
+          source: "company",
+          company_id: companyId,
+          signal_count: realChanges,
+          url: `${appBaseUrl()}/preview`,
+        },
+      });
+    }
+
+    await dispatchEvent({
+      id: eventId(),
+      type: "company.scrape.completed",
+      created_at: nowIso,
+      pipeline_version: pipelineVersion(),
+      data: {
+        company_id: companyId,
+        company_name: company.name,
+        domain: company.domain,
+        sources_scraped: sourcesScraped,
+        changes: realChanges,
+        brief_generated: briefGenerated,
+      },
+    });
 
     return {
       ok: true,

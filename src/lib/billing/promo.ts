@@ -1,5 +1,4 @@
 import { FOUNDING_LIMIT } from "./plans";
-
 export const PROMO_CODES = {
   VIGILANTE: {
     code: "VIGILANTE",

@@ -16,6 +16,10 @@
   --success: #4ade80;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 html,
 body {
   height: 100%;

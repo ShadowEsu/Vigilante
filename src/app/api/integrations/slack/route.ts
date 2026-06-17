@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { postSlackWebhook } from "@/lib/integrations/slack";
 
 export const dynamic = "force-dynamic";
 
@@ -23,25 +24,10 @@ export async function POST(request: Request) {
       body.message?.trim() ||
       `Vigilante test — competitive intel alerts for ${body.company ?? "your watchlist"} are configured.`;
 
-    const payload: Record<string, unknown> = { text };
-    if (body.channel?.trim()) {
-      payload.channel = body.channel.trim();
-    }
-
-    const res = await fetch(webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(12_000),
+    await postSlackWebhook(webhookUrl, {
+      text,
+      ...(body.channel?.trim() ? { channel: body.channel.trim() } : {}),
     });
-
-    if (!res.ok) {
-      const errText = await res.text().catch(() => "");
-      return NextResponse.json(
-        { ok: false, error: errText || `Slack returned HTTP ${res.status}` },
-        { status: 502 }
-      );
-    }
 
     return NextResponse.json({ ok: true });
   } catch (err) {

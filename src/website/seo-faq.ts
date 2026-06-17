@@ -7,7 +7,7 @@ export const LAUNCH_FAQ = [
   {
     question: "How much does Vigilante cost?",
     answer:
-      "The Growth plan is $10 per month for 3 AI agents running full competitor analysis. Use promo code VIGILANTE for 50% off ($5/mo). A free tier covers 2 agents. Team and custom plans are available for larger watchlists.",
+      "Free tier: $0/mo for 2 agents. Growth: $10/mo for 3 AI agents. Promo VIGILANTE: $5/mo (50% off). Team: $20/mo for larger watchlists.",
   },
   {
     question: "How is Vigilante different from other competitor monitoring tools?",
@@ -23,6 +23,11 @@ export const LAUNCH_FAQ = [
     question: "Who uses competitive intelligence monitoring?",
     answer:
       "Product managers, corporate development teams, investors, strategy leads, and sales enablement teams use Vigilante to track competitor pricing, product launches, hiring velocity, and regulatory filings without manual spreadsheet research.",
+  },
+  {
+    question: "Will I get a confirmation email after joining the waitlist?",
+    answer:
+      "Yes. After you sign up, we send a confirmation to your inbox (check spam). Your email is only used for waitlist and product access — we don't sell it or show it publicly on the site.",
   },
   {
     question: "Can I try Vigilante before paying?",

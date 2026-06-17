@@ -130,13 +130,19 @@ export function ProductShowcase() {
         </div>
       </div>
 
-      <div style={{ position: "relative", minHeight: 340 }}>
-        <div style={{ display: scene === "terminal" ? "block" : "none" }}>
+      <div className="launch-scene-stage">
+        <div className={`launch-scene-panel ${scene === "terminal" ? "launch-scene-panel--active" : ""}`}>
           <TerminalSearch demo embed onDemoComplete={handleDemoComplete} />
         </div>
-        {scene === "overview" && <OverviewScene discovered={preview} />}
-        {scene === "insights" && <InsightsScene discovered={preview} />}
-        {scene === "brief" && <BriefScene discovered={preview} />}
+        <div className={`launch-scene-panel ${scene === "overview" ? "launch-scene-panel--active" : ""}`}>
+          <OverviewScene discovered={preview} />
+        </div>
+        <div className={`launch-scene-panel ${scene === "insights" ? "launch-scene-panel--active" : ""}`}>
+          <InsightsScene discovered={preview} />
+        </div>
+        <div className={`launch-scene-panel ${scene === "brief" ? "launch-scene-panel--active" : ""}`}>
+          <BriefScene discovered={preview} />
+        </div>
       </div>
 
       <div

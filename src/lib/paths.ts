@@ -14,9 +14,9 @@ export function isStaticGithubPages(): boolean {
   return process.env.NEXT_PUBLIC_GITHUB_PAGES === "true";
 }
 
-/** Live demo target — full app locally, homepage demo on static GitHub Pages. */
+/** Live demo — full preview app (local + GitHub Pages). */
 export function demoPath(): string {
-  return isStaticGithubPages() ? "/#product" : "/preview";
+  return appPath("/preview");
 }
 
 /** Magic-link return URL — must match Supabase Auth → URL Configuration → Redirect URLs. */

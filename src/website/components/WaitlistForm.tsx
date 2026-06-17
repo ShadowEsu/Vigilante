@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { formatUsdMonthly, maskEmail } from "@/lib/billing/format-price";
 import { PLANS } from "@/lib/billing/plans";
 import { submitWaitlistSignup } from "@/lib/waitlist/client";
 import { useLaunchCheckout } from "../context/LaunchCheckoutContext";
@@ -18,6 +19,7 @@ export function WaitlistForm({
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
   const [role, setRole] = useState("");
+  const [honey, setHoney] = useState("");
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +38,7 @@ export function WaitlistForm({
         role: role || undefined,
         plan_tier: plan,
         promo_code: promo?.code,
+        _honey: honey,
       });
       if (result.quote) setConfirmedQuote(result.quote);
       setDone(true);
@@ -51,14 +54,12 @@ export function WaitlistForm({
     plan === "custom"
       ? "custom pricing"
       : plan === "growth" && promo
-        ? `$${confirmedQuote.dueMonthlyUsd}/mo · 3 AI agents`
-        : confirmedQuote.dueMonthlyUsd === 0
-          ? "$0/mo at launch"
-          : `$${confirmedQuote.dueMonthlyUsd}/mo at launch`;
+        ? `${formatUsdMonthly(confirmedQuote.dueMonthlyUsd)} · 3 AI agents`
+        : formatUsdMonthly(confirmedQuote.dueMonthlyUsd);
 
   const ctaLabel =
     plan === "growth" && promo
-      ? `Join — 3 agents · $${confirmedQuote.dueMonthlyUsd}/mo`
+      ? `Join — 3 agents · ${formatUsdMonthly(confirmedQuote.dueMonthlyUsd)}`
       : "Join waitlist";
 
   if (done) {
@@ -74,7 +75,7 @@ export function WaitlistForm({
           width: "100%",
         }}
       >
-        You&apos;re on the list ({PLANS[plan].name} · {dueLabel}). We&apos;ll email {email} when your workspace is ready.
+        You&apos;re on the list ({PLANS[plan].name} · {dueLabel}). Check {maskEmail(email)} — we sent a confirmation. Workspace opens soon, santai.
       </div>
     );
   }
@@ -99,11 +100,22 @@ export function WaitlistForm({
         }}
       >
         <input
+          type="text"
+          name="_honey"
+          value={honey}
+          onChange={(e) => setHoney(e.target.value)}
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden
+          className="launch-waitlist-honey"
+        />
+        <input
           type="email"
           required
           placeholder="you@company.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
           className={`launch-waitlist-input ${isFooter ? "launch-waitlist-input--footer" : ""}`}
         />
         {isFooter ? (
@@ -154,7 +166,7 @@ export function WaitlistForm({
         )}
       </form>
       <p style={{ fontSize: 10, color: "rgba(255,255,255,0.28)", margin: "10px 0 0", letterSpacing: "0.04em" }}>
-        No payment today — card on file when workspace opens.
+        No payment today — we only email you about access. Your address stays private.
       </p>
     </div>
   );

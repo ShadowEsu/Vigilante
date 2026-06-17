@@ -17,6 +17,13 @@ const LINKS: { href: string; label: string; route?: boolean }[] = [
 export function LaunchNav({ scrolled }: { scrolled: boolean }) {
   const [open, setOpen] = useState(false);
 
+  const scrollToSection = (href: string) => {
+    setOpen(false);
+    if (!href.startsWith("#")) return;
+    const el = document.querySelector(href);
+    el?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <nav className={`launch-nav ${scrolled ? "launch-nav--scrolled" : ""}`} aria-label="Primary">
       <Link href="/" className="launch-nav-brand" onClick={() => setOpen(false)}>
@@ -43,7 +50,15 @@ export function LaunchNav({ scrolled }: { scrolled: boolean }) {
               {link.label}
             </Link>
           ) : (
-            <a key={link.label} href={link.href} className="launch-nav-link" onClick={() => setOpen(false)}>
+            <a
+              key={link.label}
+              href={link.href}
+              className="launch-nav-link"
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToSection(link.href);
+              }}
+            >
               {link.label}
             </a>
           )

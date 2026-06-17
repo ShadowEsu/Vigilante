@@ -1,3 +1,5 @@
+import { formatUsdMonthly, formatUsd } from "./format-price";
+
 export type PlanTier = "free" | "growth" | "team" | "custom";
 
 export interface PlanDef {
@@ -78,13 +80,15 @@ export function quotePlan(
 
   let note = "No charge until your workspace opens.";
   if (plan === "free") {
-    note = "Free forever for up to 2 agents.";
+    note = "$0/mo — free forever for up to 2 agents.";
   } else if (foundingEligible && dueMonthlyUsd === 0) {
-    note = `$0/mo for ${FOUNDING_CREDIT_MONTHS} months (founding credit), then $${afterPromo}/mo.`;
+    note = `${formatUsdMonthly(0)} for ${FOUNDING_CREDIT_MONTHS} months (founding credit), then ${formatUsdMonthly(afterPromo)}.`;
   } else if (foundingEligible && foundingCreditUsd > 0) {
-    note = `$${dueMonthlyUsd}/mo for ${FOUNDING_CREDIT_MONTHS} months with $${foundingCreditUsd} credit, then $${afterPromo}/mo.`;
+    note = `${formatUsdMonthly(dueMonthlyUsd)} for ${FOUNDING_CREDIT_MONTHS} months with ${formatUsd(foundingCreditUsd)} credit, then ${formatUsdMonthly(afterPromo)}.`;
   } else if (percentOff > 0) {
-    note = `$${dueMonthlyUsd}/mo with promo — billed when workspace opens.`;
+    note = `${formatUsdMonthly(dueMonthlyUsd)} with promo — billed when workspace opens.`;
+  } else if (base > 0) {
+    note = `${formatUsdMonthly(dueMonthlyUsd)} — billed when workspace opens.`;
   }
 
   return {

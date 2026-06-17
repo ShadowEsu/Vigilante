@@ -7,6 +7,7 @@ import {
   hasSupabaseConfig,
 } from "@/lib/supabase/waitlist";
 import { addWaitlistLocal, countWaitlistLocal } from "@/lib/waitlist/store";
+import { submitWaitlistToFormSubmit } from "@/lib/waitlist/formsubmit";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,7 @@ const CORS_ORIGINS = [
   "http://127.0.0.1:3000",
 ];
 
-function corsHeaders(request: Request) {
+function corsHeaders(request: Request): Record<string, string> {
   const origin = request.headers.get("origin") ?? "";
   const allowed = CORS_ORIGINS.some((o) => origin === o || origin.startsWith(`${o}/`));
   if (!allowed) return {};
@@ -65,7 +66,12 @@ export async function POST(request: Request) {
       role?: string;
       plan_tier?: string;
       promo_code?: string;
+      _honey?: string;
     };
+
+    if (body._honey?.trim()) {
+      return jsonWithCors(request, { ok: false, error: "Signup blocked" }, { status: 400 });
+    }
 
     const email = body.email?.trim().toLowerCase() ?? "";
     if (!EMAIL_RE.test(email)) {
@@ -128,10 +134,19 @@ export async function POST(request: Request) {
 
       if (error) {
         if (error.code === "23505") {
+          await submitWaitlistToFormSubmit(
+            { email, company: company ?? undefined, role: role ?? undefined, plan_tier, promo_code: promo_code ?? undefined },
+            quote
+          ).catch(() => undefined);
           return jsonWithCors(request, { ok: true, duplicate: true, quote });
         }
         throw error;
       }
+
+      await submitWaitlistToFormSubmit(
+        { email, company: company ?? undefined, role: role ?? undefined, plan_tier, promo_code: promo_code ?? undefined },
+        quote
+      ).catch(() => undefined);
 
       return jsonWithCors(request, {
         ok: true,
@@ -152,6 +167,11 @@ export async function POST(request: Request) {
       founding_credit: payload.founding_credit,
       due_monthly_usd: quote.dueMonthlyUsd,
     });
+
+    await submitWaitlistToFormSubmit(
+      { email, company: company ?? undefined, role: role ?? undefined, plan_tier, promo_code: promo_code ?? undefined },
+      quote
+    ).catch(() => undefined);
 
     return jsonWithCors(request, {
       ok: true,

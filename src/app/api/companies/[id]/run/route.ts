@@ -7,18 +7,19 @@ export const maxDuration = 120;
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = (await request.json().catch(() => ({}))) as { rediscover?: boolean };
     if (body.rediscover) {
-      await rediscoverCompany(params.id);
+      await rediscoverCompany(id);
     }
-    const result = await runCompanyScrape(params.id);
+    const result = await runCompanyScrape(id);
     if (!result.ok) {
       return NextResponse.json({ error: result.error }, { status: 500 });
     }
-    const dashboard = await getCompanyDashboard(params.id);
+    const dashboard = await getCompanyDashboard(id);
     return NextResponse.json({ ...result, dashboard });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Scrape failed";

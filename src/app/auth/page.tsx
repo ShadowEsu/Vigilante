@@ -47,7 +47,7 @@ function AuthForm() {
         <Link href={appPath("/")} className="text-xs font-semibold tracking-[0.18em]">
           VIGILANTE
         </Link>
-        <p className="text-[11px] text-muted mt-1 tracking-wide">magic link sign in</p>
+        <p className="text-[11px] text-muted mt-1 tracking-wide">Magic link · no password</p>
       </div>
 
       {sent ? (
@@ -71,7 +71,7 @@ function AuthForm() {
           </div>
           {error && <p className="text-xs text-dim" role="alert">{error}</p>}
           <button type="submit" disabled={loading} className="btn-primary w-full">
-            {loading ? "…" : "[ CONTINUE ]"}
+            {loading ? "Sending…" : "Continue"}
           </button>
         </form>
       )}

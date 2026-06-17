@@ -10,7 +10,7 @@ export function AccountSwitcher() {
   const persona = LAUNCH.personas[active];
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "minmax(240px, 280px) 1fr", gap: 24, alignItems: "stretch" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "minmax(240px, 280px) 1fr", gap: 24, alignItems: "stretch" }} className="launch-persona-grid">
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <div style={{ fontSize: 10, letterSpacing: "0.16em", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>
           ACCOUNTS
@@ -33,11 +33,11 @@ export function AccountSwitcher() {
           className="btn-ghost"
           style={{ marginTop: 8, textAlign: "center", textDecoration: "none", padding: "12px", display: "block" }}
         >
-          [ SIGN IN WITH MAGIC LINK ]
+          [ Sign in with magic link ]
         </Link>
       </div>
 
-      <div className="launch-browser" style={{ animation: "fadeUp 0.5s ease both" }} key={persona.id}>
+      <div className="launch-browser launch-workspace-preview" style={{ animation: "fadeUp 0.5s ease both" }} key={persona.id}>
         <div className="launch-browser-chrome">
           <span className="launch-browser-dot launch-browser-dot--live" />
           <span style={{ fontSize: 11, color: "rgba(255,255,255,0.45)" }}>
@@ -76,7 +76,7 @@ export function AccountSwitcher() {
           </div>
           <div style={{ marginTop: 20, display: "flex", gap: 12 }}>
             <Link href={demoPath()} className="btn-primary" style={{ textDecoration: "none", fontSize: 11 }}>
-              [ OPEN DASHBOARD ]
+              Open dashboard
             </Link>
             <span style={{ fontSize: 11, color: "rgba(255,255,255,0.32)", alignSelf: "center" }}>
               Isolated per account

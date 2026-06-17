@@ -15,6 +15,7 @@ import { LaunchGrid3d } from "./components/LaunchGrid3d";
 import { FaqSection } from "./components/FaqSection";
 import { LaunchCheckoutProvider } from "./context/LaunchCheckoutContext";
 import { fetchWaitlistCount } from "@/lib/waitlist/client";
+import { LaunchNav } from "./components/LaunchNav";
 import { LegalFooterLinks } from "@/components/legal/LegalPage";
 import { clusterHref } from "@/lib/seo/content-cluster";
 import { demoPath, appPath } from "@/lib/paths";
@@ -57,22 +58,7 @@ function LaunchPageInner() {
 
       <div className="launch-page-content">
         <header>
-        <nav className={`launch-nav ${scrolled ? "launch-nav--scrolled" : ""}`} aria-label="Primary">
-          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", color: "inherit" }}>
-            <span style={{ width: 26, height: 26, border: "1px solid rgba(255,255,255,0.45)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 600 }}>V</span>
-            <span style={{ fontSize: 13, letterSpacing: "0.22em", fontWeight: 600 }}>{LAUNCH.brand}</span>
-          </Link>
-          <div style={{ display: "flex", alignItems: "center", gap: 20, fontSize: 11, letterSpacing: "0.1em" }}>
-            <a href="#product" style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>DEMO</a>
-            <a href="#how" style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>HOW</a>
-            <a href="#pricing" style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>PRICING</a>
-            <a href="#faq" style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>FAQ</a>
-            <Link href={appPath("/competitive-intelligence")} style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>GUIDE</Link>
-            <a href="#waitlist" style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>WAITLIST</a>
-            <Link href={appPath("/auth")} className="btn-ghost" style={{ textDecoration: "none" }}>[ SIGN IN ]</Link>
-            <Link href={demoPath()} className="btn-primary" style={{ textDecoration: "none" }}>[ LIVE DEMO ]</Link>
-          </div>
-        </nav>
+          <LaunchNav scrolled={scrolled} />
         </header>
 
         <main>
@@ -200,10 +186,10 @@ function LaunchPageInner() {
             </div>
             <div style={{ marginTop: 28, display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
               <Link href={demoPath()} className="btn-primary" style={{ textDecoration: "none" }}>
-                [ TRY LIVE DEMO ]
+                Try live demo
               </Link>
               <Link href={appPath("/auth")} className="btn-ghost" style={{ textDecoration: "none" }}>
-                [ SIGN IN ]
+                Sign in
               </Link>
             </div>
           </div>

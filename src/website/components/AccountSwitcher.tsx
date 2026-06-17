@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { LAUNCH } from "../copy";
+import { appPath, demoPath } from "@/lib/paths";
 
 export function AccountSwitcher() {
   const [active, setActive] = useState(0);
@@ -26,13 +28,13 @@ export function AccountSwitcher() {
             <div style={{ fontSize: 10, color: "rgba(255,255,255,0.28)", marginTop: 8 }}>{p.email}</div>
           </button>
         ))}
-        <a
-          href="/auth"
+        <Link
+          href={appPath("/auth")}
           className="btn-ghost"
-          style={{ marginTop: 8, textAlign: "center", textDecoration: "none", padding: "12px" }}
+          style={{ marginTop: 8, textAlign: "center", textDecoration: "none", padding: "12px", display: "block" }}
         >
           [ SIGN IN WITH MAGIC LINK ]
-        </a>
+        </Link>
       </div>
 
       <div className="launch-browser" style={{ animation: "fadeUp 0.5s ease both" }} key={persona.id}>
@@ -73,9 +75,9 @@ export function AccountSwitcher() {
             <div style={{ fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.5 }}>{persona.highlight}</div>
           </div>
           <div style={{ marginTop: 20, display: "flex", gap: 12 }}>
-            <a href="/preview" className="btn-primary" style={{ textDecoration: "none", fontSize: 11 }}>
+            <Link href={demoPath()} className="btn-primary" style={{ textDecoration: "none", fontSize: 11 }}>
               [ OPEN DASHBOARD ]
-            </a>
+            </Link>
             <span style={{ fontSize: 11, color: "rgba(255,255,255,0.32)", alignSelf: "center" }}>
               Isolated per account
             </span>

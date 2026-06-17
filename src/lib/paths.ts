@@ -1,12 +1,22 @@
-/** Prefix for fetch/API paths when hosted under a subpath (e.g. GitHub Pages). */
+/** Prefix for fetch(), `<a href>`, and absolute URLs — not for Next.js `<Link>` / router. */
 export function withBasePath(path: string): string {
   const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
   if (!base) return path;
   return `${base}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
+/** Path for Next.js `<Link>` and `router` — basePath is applied automatically. */
+export function appPath(path: string): string {
+  return path.startsWith("/") ? path : `/${path}`;
+}
+
 export function isStaticGithubPages(): boolean {
   return process.env.NEXT_PUBLIC_GITHUB_PAGES === "true";
+}
+
+/** Live demo target — full app locally, homepage demo on static GitHub Pages. */
+export function demoPath(): string {
+  return isStaticGithubPages() ? "/#product" : "/preview";
 }
 
 /** Magic-link return URL — must match Supabase Auth → URL Configuration → Redirect URLs. */
@@ -20,5 +30,5 @@ export function getAuthCallbackUrl(): string {
 }
 
 export function defaultPostAuthPath(): string {
-  return isStaticGithubPages() ? withBasePath("/preview") : withBasePath("/app");
+  return isStaticGithubPages() ? appPath("/preview") : appPath("/app");
 }

@@ -17,6 +17,7 @@ import { LaunchCheckoutProvider } from "./context/LaunchCheckoutContext";
 import { fetchWaitlistCount } from "@/lib/waitlist/client";
 import { LegalFooterLinks } from "@/components/legal/LegalPage";
 import { clusterHref } from "@/lib/seo/content-cluster";
+import { demoPath, appPath } from "@/lib/paths";
 
 export function LaunchPage() {
   return (
@@ -66,10 +67,10 @@ function LaunchPageInner() {
             <a href="#how" style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>HOW</a>
             <a href="#pricing" style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>PRICING</a>
             <a href="#faq" style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>FAQ</a>
-            <Link href="/competitive-intelligence" style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>GUIDE</Link>
+            <Link href={appPath("/competitive-intelligence")} style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>GUIDE</Link>
             <a href="#waitlist" style={{ color: "rgba(255,255,255,0.45)", textDecoration: "none" }}>WAITLIST</a>
-            <Link href="/auth" className="btn-ghost" style={{ textDecoration: "none" }}>[ SIGN IN ]</Link>
-            <Link href="/preview" className="btn-primary" style={{ textDecoration: "none" }}>[ LIVE DEMO ]</Link>
+            <Link href={appPath("/auth")} className="btn-ghost" style={{ textDecoration: "none" }}>[ SIGN IN ]</Link>
+            <Link href={demoPath()} className="btn-primary" style={{ textDecoration: "none" }}>[ LIVE DEMO ]</Link>
           </div>
         </nav>
         </header>
@@ -123,7 +124,7 @@ function LaunchPageInner() {
             <ProductShowcase />
             <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 14, textAlign: "center", letterSpacing: "0.08em" }}>
               {LAUNCH.sections.demoHint}{" "}
-              <Link href="/preview" style={{ color: "rgba(255,255,255,0.5)" }}>/preview</Link>
+              <Link href={demoPath()} style={{ color: "rgba(255,255,255,0.5)" }}>/preview</Link>
             </p>
           </div>
         </section>
@@ -198,10 +199,10 @@ function LaunchPageInner() {
               <WaitlistForm variant="footer" onSuccess={() => setWaitlistCount((c) => c + 1)} />
             </div>
             <div style={{ marginTop: 28, display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-              <Link href="/preview" className="btn-primary" style={{ textDecoration: "none" }}>
+              <Link href={demoPath()} className="btn-primary" style={{ textDecoration: "none" }}>
                 [ TRY LIVE DEMO ]
               </Link>
-              <Link href="/auth" className="btn-ghost" style={{ textDecoration: "none" }}>
+              <Link href={appPath("/auth")} className="btn-ghost" style={{ textDecoration: "none" }}>
                 [ SIGN IN ]
               </Link>
             </div>
@@ -217,13 +218,13 @@ function LaunchPageInner() {
             <Link href={clusterHref("/competitive-intelligence")} style={{ color: "rgba(255,255,255,0.35)", marginRight: 16, textDecoration: "none" }}>
               CI Guide
             </Link>
-            <Link href="/resources/competitive-intelligence-tools" style={{ color: "rgba(255,255,255,0.35)", marginRight: 16, textDecoration: "none" }}>
+            <Link href={appPath("/resources/competitive-intelligence-tools")} style={{ color: "rgba(255,255,255,0.35)", marginRight: 16, textDecoration: "none" }}>
               Tool Comparison
             </Link>
-            <Link href="/press" style={{ color: "rgba(255,255,255,0.35)", marginRight: 16, textDecoration: "none" }}>
+            <Link href={appPath("/press")} style={{ color: "rgba(255,255,255,0.35)", marginRight: 16, textDecoration: "none" }}>
               Press
             </Link>
-            <Link href="/legal" style={{ color: "rgba(255,255,255,0.35)", marginRight: 16, textDecoration: "none" }}>
+            <Link href={appPath("/legal")} style={{ color: "rgba(255,255,255,0.35)", marginRight: 16, textDecoration: "none" }}>
               Legal
             </Link>
             <a href="https://github.com/ShadowEsu/Vigilante" rel="noopener noreferrer" style={{ color: "rgba(255,255,255,0.35)", textDecoration: "none" }}>

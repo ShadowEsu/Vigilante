@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { getAuthCallbackUrl, withBasePath } from "@/lib/paths";
+import { getAuthCallbackUrl, appPath, demoPath } from "@/lib/paths";
 
 function AuthForm() {
   const searchParams = useSearchParams();
@@ -44,7 +44,7 @@ function AuthForm() {
   return (
     <div className="w-full max-w-xs space-y-6">
       <div>
-        <Link href={withBasePath("/")} className="text-xs font-semibold tracking-[0.18em]">
+        <Link href={appPath("/")} className="text-xs font-semibold tracking-[0.18em]">
           VIGILANTE
         </Link>
         <p className="text-[11px] text-muted mt-1 tracking-wide">magic link sign in</p>
@@ -76,17 +76,17 @@ function AuthForm() {
         </form>
       )}
 
-      <Link href={withBasePath("/preview")} className="block text-[11px] text-muted hover:text-fg tracking-wide">
+      <Link href={demoPath()} className="block text-[11px] text-muted hover:text-fg tracking-wide">
         demo →
       </Link>
 
       <p className="text-[10px] text-faint leading-relaxed tracking-wide">
         By continuing, you agree to our{" "}
-        <Link href={withBasePath("/legal/terms")} className="text-muted hover:text-fg no-underline">
+        <Link href={appPath("/legal/terms")} className="text-muted hover:text-fg no-underline">
           Terms
         </Link>{" "}
         and{" "}
-        <Link href={withBasePath("/legal/privacy")} className="text-muted hover:text-fg no-underline">
+        <Link href={appPath("/legal/privacy")} className="text-muted hover:text-fg no-underline">
           Privacy Policy
         </Link>
         .

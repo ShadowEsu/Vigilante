@@ -58,8 +58,8 @@ export function WaitlistForm({
 
   const ctaLabel =
     plan === "growth" && promo
-      ? `[ JOIN — 3 AI AGENTS · $${confirmedQuote.dueMonthlyUsd}/MO ]`
-      : "[ JOIN WAITLIST ]";
+      ? `Join — 3 agents · $${confirmedQuote.dueMonthlyUsd}/mo`
+      : "Join waitlist";
 
   if (done) {
     return (

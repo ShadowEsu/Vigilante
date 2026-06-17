@@ -17,6 +17,7 @@ function StepBlock({ step, last, index }: { step: (typeof LAUNCH.steps)[0]; last
         style={{
           borderColor: `${step.accent}55`,
           color: step.accent,
+          boxShadow: visible ? `0 0 24px ${step.accent}22` : undefined,
         }}
       >
         {step.num}
@@ -24,9 +25,14 @@ function StepBlock({ step, last, index }: { step: (typeof LAUNCH.steps)[0]; last
       <h3 style={{ fontSize: 13, letterSpacing: "0.2em", color: step.accent, margin: "0 0 8px", fontWeight: 500 }}>
         {step.title}
       </h3>
-      <p style={{ fontSize: 14, lineHeight: 1.65, color: "rgba(255,255,255,0.52)", margin: 0, maxWidth: "44ch" }}>
+      <p style={{ fontSize: 14, lineHeight: 1.65, color: "rgba(255,255,255,0.52)", margin: "0 0 10px", maxWidth: "44ch" }}>
         {step.body}
       </p>
+      {"hint" in step && step.hint && (
+        <p style={{ fontSize: 10, letterSpacing: "0.08em", color: "rgba(255,255,255,0.28)", margin: 0 }}>
+          {step.hint}
+        </p>
+      )}
     </div>
   );
 }
@@ -34,12 +40,10 @@ function StepBlock({ step, last, index }: { step: (typeof LAUNCH.steps)[0]; last
 export function FeatureWalkthrough() {
   const { ref, visible } = useInView<HTMLElement>(0.1);
   return (
-    <section id="how" ref={ref} style={{ padding: "88px 28px", maxWidth: 1100, margin: "0 auto" }}>
+    <section id="how" ref={ref} className="launch-section">
       <div className={`launch-reveal ${visible ? "launch-reveal--visible" : ""}`}>
-        <div style={{ fontSize: 10, letterSpacing: "0.2em", color: "rgba(255,255,255,0.32)", marginBottom: 12 }}>HOW IT WORKS</div>
-        <h2 style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 600, letterSpacing: "-0.02em", margin: "0 0 40px", maxWidth: "18ch" }}>
-          {LAUNCH.sections.howTitle}
-        </h2>
+        <p className="launch-eyebrow">HOW IT WORKS</p>
+        <h2 className="launch-section-title">{LAUNCH.sections.howTitle}</h2>
       </div>
       <div style={{ marginTop: 4 }}>
         {LAUNCH.steps.map((step, i) => (

@@ -115,24 +115,14 @@ export function ProductShowcase() {
         <span style={{ flex: 1, textAlign: "center", fontSize: 11, color: "rgba(255,255,255,0.35)", letterSpacing: "0.08em" }}>
           vigilante.app / demo
         </span>
-        <div style={{ display: "flex", gap: 6 }}>
+        <div style={{ display: "flex", gap: 6 }} className="launch-scene-tabs">
           {SCENES.map((s) => (
             <button
               key={s.id}
               type="button"
               onClick={() => selectScene(s.id)}
               disabled={s.id !== "terminal" && !discovered}
-              style={{
-                background: scene === s.id ? "rgba(255,255,255,0.08)" : "transparent",
-                border: `1px solid ${scene === s.id ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.08)"}`,
-                padding: "4px 10px",
-                font: "inherit",
-                fontSize: 9,
-                letterSpacing: "0.1em",
-                color: scene === s.id ? "rgba(255,255,255,0.85)" : discovered || s.id === "terminal" ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.18)",
-                cursor: discovered || s.id === "terminal" ? "pointer" : "not-allowed",
-                opacity: discovered || s.id === "terminal" ? 1 : 0.55,
-              }}
+              className={`launch-scene-tab ${scene === s.id ? "launch-scene-tab--active" : ""}`}
             >
               {s.label}
             </button>

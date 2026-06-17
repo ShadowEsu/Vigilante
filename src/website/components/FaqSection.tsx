@@ -13,55 +13,33 @@ export function FaqSection() {
       id="faq"
       ref={ref}
       aria-labelledby="faq-heading"
-      style={{
-        padding: "80px 28px 100px",
-        maxWidth: 800,
-        margin: "0 auto",
-        borderTop: "1px solid rgba(255,255,255,0.06)",
-      }}
+      className="launch-section launch-section--faq"
     >
       <div className={`launch-reveal ${visible ? "launch-reveal--visible" : ""}`}>
-        <p style={{ fontSize: 10, letterSpacing: "0.2em", color: "rgba(255,255,255,0.32)", marginBottom: 12 }}>FAQ</p>
-        <h2
-          id="faq-heading"
-          style={{ fontSize: "clamp(1.4rem, 3vw, 1.85rem)", fontWeight: 600, margin: "0 0 32px", letterSpacing: "-0.02em" }}
-        >
-          Competitive intelligence, answered.
+        <p className="launch-eyebrow">FAQ</p>
+        <h2 id="faq-heading" className="launch-section-title">
+          Questions teams ask before they switch.
         </h2>
       </div>
       <div className={`launch-reveal launch-reveal-delay-1 ${visible ? "launch-reveal--visible" : ""}`}>
         {LAUNCH_FAQ.map((item, i) => {
           const expanded = open === i;
           return (
-            <div
-              key={item.question}
-              style={{ borderBottom: "1px solid rgba(255,255,255,0.08)", padding: "18px 0" }}
-            >
+            <div key={item.question} className={`launch-faq-item ${expanded ? "launch-faq-item--open" : ""}`}>
               <button
                 type="button"
+                className="launch-faq-trigger"
                 onClick={() => setOpen(expanded ? null : i)}
                 aria-expanded={expanded}
-                style={{
-                  width: "100%",
-                  textAlign: "left",
-                  background: "none",
-                  border: "none",
-                  color: "inherit",
-                  font: "inherit",
-                  cursor: "pointer",
-                  fontSize: 14,
-                  fontWeight: 500,
-                  lineHeight: 1.5,
-                  padding: 0,
-                }}
               >
-                {item.question}
+                <span>{item.question}</span>
+                <span className="launch-faq-chevron" aria-hidden>
+                  {expanded ? "−" : "+"}
+                </span>
               </button>
-              {expanded && (
-                <p style={{ fontSize: 13, lineHeight: 1.7, color: "rgba(255,255,255,0.48)", margin: "12px 0 0" }}>
-                  {item.answer}
-                </p>
-              )}
+              <div className={`launch-faq-panel ${expanded ? "launch-faq-panel--open" : ""}`}>
+                <p>{item.answer}</p>
+              </div>
             </div>
           );
         })}

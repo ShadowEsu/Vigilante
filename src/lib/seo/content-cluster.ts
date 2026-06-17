@@ -1,4 +1,4 @@
-import { withBasePath } from "@/lib/paths";
+import { appPath } from "@/lib/paths";
 
 /** Topic cluster for competitive intelligence — internal linking + DR distribution. */
 export const CI_TOPIC_CLUSTER = {
@@ -34,6 +34,7 @@ export const CI_TOPIC_CLUSTER = {
   ],
 } as const;
 
+/** For Next.js Link — do not manually prefix basePath. */
 export function clusterHref(path: string) {
-  return withBasePath(path);
+  return appPath(path);
 }

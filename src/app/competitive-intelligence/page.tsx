@@ -4,6 +4,7 @@ import { TopicClusterBreadcrumb, TopicClusterRelated } from "@/components/seo/To
 import { buildPageMetadata } from "@/lib/seo/metadata";
 import { articleJsonLd } from "@/lib/seo/json-ld";
 import { clusterHref } from "@/lib/seo/content-cluster";
+import { demoPath } from "@/lib/paths";
 
 export const metadata = buildPageMetadata({
   title: "Competitive Intelligence Software — How AI Monitoring Works",
@@ -108,7 +109,7 @@ export default function CompetitiveIntelligencePage() {
             <Link href={clusterHref("/resources/competitor-monitoring-checklist")} className="btn-ghost" style={{ textDecoration: "none", fontSize: 12, marginRight: 12 }}>
               [ CHECKLIST ]
             </Link>
-            <Link href={clusterHref("/preview")} className="btn-ghost" style={{ textDecoration: "none", fontSize: 12 }}>
+            <Link href={demoPath()} className="btn-ghost" style={{ textDecoration: "none", fontSize: 12 }}>
               [ LIVE DEMO ]
             </Link>
           </section>

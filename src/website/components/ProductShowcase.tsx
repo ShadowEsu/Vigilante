@@ -9,6 +9,7 @@ import {
   demoInsightItems,
   demoSignalCategories,
 } from "../demo-intel";
+import { demoPath } from "@/lib/paths";
 
 const SCENES = [
   { id: "terminal", label: "DISCOVER" },
@@ -167,7 +168,7 @@ export function ProductShowcase() {
             ? `${discovered.name} · ${discovered.sources.length} sources`
             : "Type a company — live discovery"}
         </span>
-        <Link href="/preview" style={{ color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>
+        <Link href={demoPath()} style={{ color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>
           open full app →
         </Link>
       </div>

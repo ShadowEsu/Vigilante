@@ -7,7 +7,13 @@ const stash = path.join(root, ".github-pages-stash");
 const moves = [
   "src/app/api",
   "src/app/app",
-  "src/app/preview",
+  "src/app/preview/new",
+  "src/app/preview/settings",
+  "src/app/preview/agent",
+  "src/app/preview/insights",
+  "src/app/preview/analytics",
+  "src/app/preview/signals",
+  "src/app/preview/agents",
   "src/middleware.ts",
 ];
 

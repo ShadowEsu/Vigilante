@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
-import { defaultPostAuthPath, withBasePath } from "@/lib/paths";
+import { defaultPostAuthPath, appPath } from "@/lib/paths";
 
 function AuthCallbackInner() {
   const router = useRouter();
@@ -27,7 +27,7 @@ function AuthCallbackInner() {
       if (tokenHash && type) {
         const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
         if (error) {
-          router.replace(`${withBasePath("/auth")}?error=${encodeURIComponent(error.message)}`);
+          router.replace(`${appPath("/auth")}?error=${encodeURIComponent(error.message)}`);
           return;
         }
         router.replace(next);
@@ -37,7 +37,7 @@ function AuthCallbackInner() {
       if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
         if (error) {
-          router.replace(`${withBasePath("/auth")}?error=${encodeURIComponent(error.message)}`);
+          router.replace(`${appPath("/auth")}?error=${encodeURIComponent(error.message)}`);
           return;
         }
         router.replace(next);
@@ -46,7 +46,7 @@ function AuthCallbackInner() {
 
       const { data, error } = await supabase.auth.getSession();
       if (error || !data.session) {
-        router.replace(`${withBasePath("/auth")}?error=auth`);
+        router.replace(`${appPath("/auth")}?error=auth`);
         return;
       }
       router.replace(next);
@@ -55,7 +55,7 @@ function AuthCallbackInner() {
     finish().catch((err) => {
       const msg = err instanceof Error ? err.message : "Sign-in failed";
       setMessage(msg);
-      router.replace(`${withBasePath("/auth")}?error=${encodeURIComponent(msg)}`);
+      router.replace(`${appPath("/auth")}?error=${encodeURIComponent(msg)}`);
     });
   }, [router, searchParams]);
 
@@ -65,7 +65,7 @@ function AuthCallbackInner() {
       style={{ background: "#000", color: "rgba(255,255,255,0.92)" }}
     >
       <p className="text-sm text-dim">{message}</p>
-      <Link href={withBasePath("/auth")} className="text-[11px] text-muted hover:text-fg">
+      <Link href={appPath("/auth")} className="text-[11px] text-muted hover:text-fg">
         ← back to sign in
       </Link>
     </main>

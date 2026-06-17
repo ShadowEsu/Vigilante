@@ -17,14 +17,16 @@ export const viewport = {
   initialScale: 1,
 };
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`dark ${jetbrainsMono.className}`}>
       <head>
-        <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/icons/icon.svg" />
+        <link rel="icon" href={`${basePath}/icons/icon.svg`} type="image/svg+xml" />
+        <link rel="apple-touch-icon" href={`${basePath}/icons/icon.svg`} />
       </head>
       <body
         className="font-mono min-h-screen"

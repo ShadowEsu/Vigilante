@@ -2,6 +2,7 @@ import { quotePlan, type PlanTier } from "@/lib/billing/plans";
 import { foundingSlotsRemaining, isFoundingEligible, validatePromoCode } from "@/lib/billing/promo";
 import { createClient } from "@/lib/supabase/client";
 import { isStaticGithubPages, withBasePath } from "@/lib/paths";
+import { submitWaitlistToFormSubmit } from "@/lib/waitlist/formsubmit";
 
 class WaitlistApiUnavailable extends Error {
   constructor() {
@@ -24,6 +25,40 @@ function waitlistPostUrl(): string | null {
   if (remote) return remote.replace(/\/$/, "");
   if (isStaticGithubPages()) return null;
   return withBasePath("/api/waitlist");
+}
+
+async function resolveWaitlistQuote(body: {
+  plan_tier: PlanTier;
+  promo_code?: string;
+}) {
+  let discount_percent = 0;
+  let promo_code: string | null = null;
+  if (body.promo_code?.trim()) {
+    const promo = validatePromoCode(body.promo_code);
+    if (!promo.valid) throw new Error(promo.error ?? "Invalid promo code");
+    discount_percent = promo.percentOff ?? 0;
+    promo_code = promo.code ?? null;
+  }
+
+  let signupCount = 0;
+  if (hasBrowserSupabase()) {
+    try {
+      const supabase = createClient();
+      const { data: countData, error: countError } = await supabase.rpc("waitlist_public_count");
+      if (!countError && typeof countData === "number") signupCount = countData;
+    } catch {
+      /* use 0 */
+    }
+  }
+
+  const foundingEligible = isFoundingEligible(signupCount);
+  const quote = quotePlan(body.plan_tier, {
+    percentOff: discount_percent,
+    promoCode: promo_code,
+    foundingEligible,
+  });
+
+  return { quote, promo_code, discount_percent, foundingEligible };
 }
 
 async function submitViaApi(body: {
@@ -60,52 +95,31 @@ async function submitViaApi(body: {
   return { quote: data.quote };
 }
 
-async function submitViaSupabase(body: {
-  email: string;
-  company?: string;
-  role?: string;
-  plan_tier: PlanTier;
-  promo_code?: string;
-}) {
-  let discount_percent = 0;
-  let promo_code: string | null = null;
-  if (body.promo_code?.trim()) {
-    const promo = validatePromoCode(body.promo_code);
-    if (!promo.valid) throw new Error(promo.error ?? "Invalid promo code");
-    discount_percent = promo.percentOff ?? 0;
-    promo_code = promo.code ?? null;
-  }
-
+async function submitViaSupabase(
+  body: {
+    email: string;
+    company?: string;
+    role?: string;
+    plan_tier: PlanTier;
+    promo_code?: string;
+  },
+  meta: Awaited<ReturnType<typeof resolveWaitlistQuote>>
+) {
   const supabase = createClient();
-  const { data: countData, error: countError } = await supabase.rpc("waitlist_public_count");
-  if (countError?.message?.includes("waitlist_public_count")) {
-    throw new Error(
-      "Waitlist database not set up. Run website/supabase/waitlist.sql and waitlist-public-count.sql in Supabase."
-    );
-  }
-
-  const signupCount = typeof countData === "number" ? countData : 0;
-  const foundingEligible = isFoundingEligible(signupCount);
-  const quote = quotePlan(body.plan_tier, {
-    percentOff: discount_percent,
-    promoCode: promo_code,
-    foundingEligible,
-  });
-
   const { error } = await supabase.from("waitlist").insert({
     email: body.email.trim().toLowerCase(),
     company: body.company?.trim() || null,
     role: body.role?.trim() || null,
     source: "launch",
     plan_tier: body.plan_tier,
-    promo_code,
-    discount_percent: discount_percent || null,
-    founding_credit: quote.foundingEligible && quote.foundingCreditUsd > 0,
-    due_monthly_usd: quote.dueMonthlyUsd,
+    promo_code: meta.promo_code,
+    discount_percent: meta.discount_percent || null,
+    founding_credit: meta.foundingEligible && meta.quote.foundingCreditUsd > 0,
+    due_monthly_usd: meta.quote.dueMonthlyUsd,
   });
 
   if (error) {
-    if (error.code === "23505") return { quote, duplicate: true };
+    if (error.code === "23505") return { duplicate: true };
     if (error.code === "42501" || error.message.includes("row-level security")) {
       throw new Error("Waitlist permissions not configured. Run website/supabase/waitlist.sql in Supabase.");
     }
@@ -114,7 +128,7 @@ async function submitViaSupabase(body: {
     }
     throw new Error(error.message);
   }
-  return { quote };
+  return {};
 }
 
 export async function fetchWaitlistCount(): Promise<number> {
@@ -132,7 +146,10 @@ export async function fetchWaitlistCount(): Promise<number> {
     }
   }
 
-  if (!hasBrowserSupabase()) return 412;
+  if (!hasBrowserSupabase()) {
+    const stored = typeof window !== "undefined" ? Number(localStorage.getItem("vigilante_waitlist_bump") || 0) : 0;
+    return 412 + (Number.isFinite(stored) ? stored : 0);
+  }
 
   try {
     const supabase = createClient();
@@ -200,31 +217,34 @@ export async function submitWaitlistSignup(body: {
   plan_tier: PlanTier;
   promo_code?: string;
 }) {
+  const meta = await resolveWaitlistQuote(body);
+
   if (waitlistPostUrl()) {
     try {
-      return await submitViaApi(body);
+      const result = await submitViaApi(body);
+      await submitWaitlistToFormSubmit(body, result.quote ?? meta.quote).catch(() => undefined);
+      return { quote: result.quote ?? meta.quote };
     } catch (err) {
-      if (!(err instanceof WaitlistApiUnavailable) && hasBrowserSupabase()) {
-        /* JSON error from API — surface it */
-        if (err instanceof Error && err.name !== "WaitlistApiUnavailable") throw err;
-      }
-      if (!hasBrowserSupabase()) {
-        if (err instanceof WaitlistApiUnavailable) {
-          throw new Error(
-            "Waitlist is not live on this site yet. Add Supabase keys to GitHub Actions secrets and redeploy."
-          );
-        }
+      if (!(err instanceof WaitlistApiUnavailable) && err instanceof Error && err.name !== "WaitlistApiUnavailable") {
         throw err;
       }
-      /* API down on static host — fall through to Supabase */
     }
   }
 
-  if (!hasBrowserSupabase()) {
-    throw new Error(
-      "Waitlist is not live on this site yet. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to GitHub secrets, then redeploy."
-    );
+  await submitWaitlistToFormSubmit(body, meta.quote);
+
+  if (hasBrowserSupabase()) {
+    try {
+      await submitViaSupabase(body, meta);
+    } catch {
+      /* FormSubmit already delivered the signup */
+    }
   }
 
-  return submitViaSupabase(body);
+  if (typeof window !== "undefined") {
+    const bump = Number(localStorage.getItem("vigilante_waitlist_bump") || 0) + 1;
+    localStorage.setItem("vigilante_waitlist_bump", String(bump));
+  }
+
+  return { quote: meta.quote };
 }

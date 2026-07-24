@@ -36,7 +36,7 @@ export function NewsletterView({ v }: { v: VigilState }) {
             const thumb = newsletterThumb(n.url, domain);
             return (
               <div
-                key={`${n.name}-${n.subject}`}
+                key={`${n.name}-${n.subject}-${i}`}
                 className="vigil-fade-in"
                 style={{
                   border: `1px solid ${BORDER}`,

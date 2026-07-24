@@ -724,6 +724,7 @@ export function useVigil() {
         h.category === "transaction" ? "#60A5FA" :
         h.category === "leverage" ? "#E3B341" :
         h.category === "corporate_action" ? "#FC8C8C" :
+        h.category === "pricing" ? "#E6C46E" :
         h.category === "financial" ? "#6E9BE6" :
         "rgba(255,255,255,0.55)",
       categoryLabel: h.category.replace(/_/g, " ").toUpperCase(),
@@ -785,11 +786,20 @@ export function useVigil() {
     }));
   }, [hasLive, dashboards, relativeNow]);
 
-  const stocks = STOCKS.map((s, i) => ({
-    ...s,
-    chgColor: s.dir === "▲" ? "#4ADE80" : s.dir === "▼" ? "#FC8C8C" : "rgba(255,255,255,0.6)",
-    borderRight: i < STOCKS.length - 1 ? "1px solid rgba(255,255,255,0.07)" : "none",
-  }));
+  // No market data provider is wired into the pipeline, so there is nothing
+  // live to show here. Previously this returned the hardcoded STOCKS fixture
+  // unconditionally — a panel titled "LIVE TICKERS" reporting invented prices
+  // and invented events ("insider buy Jun 12 · $2.1M block") while every other
+  // panel on the page was real. Keep the fixture for the empty/demo state, but
+  // never present it alongside live monitoring data.
+  const stocks = useMemo(() => {
+    if (hasLive) return [];
+    return STOCKS.map((s, i) => ({
+      ...s,
+      chgColor: s.dir === "▲" ? "#4ADE80" : s.dir === "▼" ? "#FC8C8C" : "rgba(255,255,255,0.6)",
+      borderRight: i < STOCKS.length - 1 ? "1px solid rgba(255,255,255,0.07)" : "none",
+    }));
+  }, [hasLive]);
 
   const scanSelectedTarget = useCallback(() => {
     if (selectedCompanyId) runCompanyScrape(selectedCompanyId);

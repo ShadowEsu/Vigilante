@@ -6,31 +6,16 @@ export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request: { headers: request.headers } });
   applySecurityHeaders(response.headers, process.env.NODE_ENV === "development");
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value;
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({ name, value, ...options });
-          response = NextResponse.next({ request: { headers: request.headers } });
-          response.cookies.set({ name, value, ...options });
-        },
-        remove(name: string, options: CookieOptions) {
-          request.cookies.set({ name, value: "", ...options });
-          response = NextResponse.next({ request: { headers: request.headers } });
-          response.cookies.set({ name, value: "", ...options });
-        },
-      },
-    }
-  );
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // These were previously asserted non-null. On a deployment without Supabase
+  // configured, createServerClient throws and every /auth and /app request
+  // returns a 500. Treat missing config as "no session" instead: sign-in can't
+  // work without Supabase anyway, but the routes still render.
+  const user = supabaseUrl && supabaseAnonKey
+    ? await getUser(request, supabaseUrl, supabaseAnonKey, (r) => { response = r; })
+    : null;
 
   const isAppRoute = request.nextUrl.pathname.startsWith("/app");
   const isAuthRoute = request.nextUrl.pathname.startsWith("/auth");
@@ -53,6 +38,49 @@ export async function middleware(request: NextRequest) {
   }
 
   return response;
+}
+
+async function getUser(
+  request: NextRequest,
+  supabaseUrl: string,
+  supabaseAnonKey: string,
+  onResponse: (r: NextResponse) => void
+) {
+  const supabase = createServerClient(
+    supabaseUrl,
+    supabaseAnonKey,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          request.cookies.set({ name, value, ...options });
+          const next = NextResponse.next({ request: { headers: request.headers } });
+          next.cookies.set({ name, value, ...options });
+          applySecurityHeaders(next.headers, process.env.NODE_ENV === "development");
+          onResponse(next);
+        },
+        remove(name: string, options: CookieOptions) {
+          request.cookies.set({ name, value: "", ...options });
+          const next = NextResponse.next({ request: { headers: request.headers } });
+          next.cookies.set({ name, value: "", ...options });
+          applySecurityHeaders(next.headers, process.env.NODE_ENV === "development");
+          onResponse(next);
+        },
+      },
+    }
+  );
+
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return user;
+  } catch {
+    // A misconfigured or unreachable Supabase project must not 500 the site.
+    return null;
+  }
 }
 
 export const config = {

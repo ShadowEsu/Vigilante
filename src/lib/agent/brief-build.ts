@@ -1,4 +1,5 @@
 import { generateOnboardingBrief } from "./llm";
+import { aiEnabled } from "./llm-client";
 import { pathLabel } from "./snapshot";
 
 export interface ScrapedPageIntel {
@@ -111,7 +112,7 @@ export function buildTemplateBrief(intel: OnboardingIntel): { title: string; bod
 export async function buildIntelBrief(intel: OnboardingIntel): Promise<{ title: string; body: string; confidence: number }> {
   const template = buildTemplateBrief(intel);
 
-  if (!process.env.ANTHROPIC_API_KEY || intel.pages.length === 0) {
+  if (!aiEnabled() || intel.pages.length === 0) {
     return template;
   }
 

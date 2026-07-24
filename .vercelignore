@@ -1,0 +1,10 @@
+# Local scrape output. Deployments have a read-only filesystem, so the runtime
+# serves the committed snapshot in src/lib/company/seed.json instead. Uploading
+# .data would shadow that seed with whatever is on the developer's disk — which
+# is how a stale duplicate company reached the first production deploy.
+.data/
+.github-pages-stash/
+
+# Local-only env — keeps the localhost FreeLLMAPI config out of production.
+.env
+.env*.local

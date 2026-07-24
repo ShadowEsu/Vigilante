@@ -1,8 +1,17 @@
-import Anthropic from "@anthropic-ai/sdk";
 import type { DetectedSignal } from "@/types/database";
-import { HAIKU_MODEL, SONNET_MODEL } from "./pricing";
+import { AGENT_CONFIG } from "./config";
+import { getLlmClient, llmBackend } from "./llm-client";
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+/** Throws when no backend is configured — callers already fall back to templates. */
+function requireClient() {
+  const client = getLlmClient();
+  if (!client) {
+    throw new Error(
+      "No LLM backend configured — set ANTHROPIC_BASE_URL + ANTHROPIC_AUTH_TOKEN (FreeLLMAPI) or ANTHROPIC_API_KEY"
+    );
+  }
+  return client;
+}
 
 const VALID_TYPES = [
   "pricing",
@@ -27,10 +36,12 @@ export async function detectSignals(
   oldText: string,
   newText: string,
   target: string,
-  sourceUrl: string
+  sourceUrl: string,
+  /** Optional agent-specific brief telling the model what to prioritise. */
+  focus?: string
 ): Promise<{ signals: DetectedSignal[]; usage: LlmUsage }> {
   const prompt = `You are a competitive intelligence analyst. Compare the OLD and NEW page content for target "${target}" (source: ${sourceUrl}).
-
+${focus ? `\n${focus}\n` : ""}
 Identify meaningful changes. Return STRICT JSON only — a JSON array with zero or more objects. Each object must have:
 - type: one of ${VALID_TYPES.join("|")}
 - title: short headline (max 80 chars)
@@ -45,8 +56,9 @@ ${oldText.slice(0, 4000)}
 NEW CONTENT:
 ${newText.slice(0, 4000)}`;
 
-  const response = await anthropic.messages.create({
-    model: HAIKU_MODEL,
+  const model = AGENT_CONFIG.models.detect;
+  const response = await requireClient().messages.create({
+    model,
     max_tokens: 1024,
     messages: [{ role: "user", content: prompt }],
   });
@@ -58,7 +70,7 @@ ${newText.slice(0, 4000)}`;
   return {
     signals,
     usage: {
-      model: HAIKU_MODEL,
+      model,
       inputTokens: response.usage.input_tokens,
       outputTokens: response.usage.output_tokens,
     },
@@ -109,9 +121,12 @@ Write a 4-5 sentence intelligence brief covering:
 Return STRICT JSON only: {"title":"...","body":"..."}
 Title: max 10 words. Body: plain prose, no bullet points, strategic tone.`;
 
-  const response = await anthropic.messages.create({
-    model: SONNET_MODEL,
-    max_tokens: 600,
+  const model = AGENT_CONFIG.models.brief;
+  // 600 was too tight: free-tier models are chattier than Sonnet and were
+  // running out of budget mid-JSON, so the brief arrived truncated.
+  const response = await requireClient().messages.create({
+    model,
+    max_tokens: 1600,
     messages: [{ role: "user", content: prompt }],
   });
 
@@ -122,7 +137,7 @@ Title: max 10 words. Body: plain prose, no bullet points, strategic tone.`;
   return {
     ...parsed,
     usage: {
-      model: SONNET_MODEL,
+      model,
       inputTokens: response.usage.input_tokens,
       outputTokens: response.usage.output_tokens,
     },
@@ -134,12 +149,7 @@ export async function generateBrief(
   target: string,
   analysisModel: string
 ): Promise<{ title: string; body: string; usage: LlmUsage }> {
-  // Phase 2: Gemini wiring — route to Google SDK when analysisModel starts with "gemini"
-  if (analysisModel.startsWith("gemini")) {
-    throw new Error(
-      "Gemini brief generation is Phase 2. Use claude-sonnet for now."
-    );
-  }
+  const model = resolveBriefModel(analysisModel);
 
   const signalSummary = signals
     .map((s) => `[${s.type}/${s.severity}] ${s.title}: ${s.detail}`)
@@ -153,9 +163,9 @@ ${signalSummary}
 Return STRICT JSON only: {"title":"...","body":"..."}
 Title: max 12 words. Body: 2-3 sentences on what changed and why it matters strategically.`;
 
-  const response = await anthropic.messages.create({
-    model: SONNET_MODEL,
-    max_tokens: 512,
+  const response = await requireClient().messages.create({
+    model,
+    max_tokens: 1024,
     messages: [{ role: "user", content: prompt }],
   });
 
@@ -166,11 +176,35 @@ Title: max 12 words. Body: 2-3 sentences on what changed and why it matters stra
   return {
     ...parsed,
     usage: {
-      model: SONNET_MODEL,
+      model,
       inputTokens: response.usage.input_tokens,
       outputTokens: response.usage.output_tokens,
     },
   };
+}
+
+/**
+ * Maps the UI-level model choice stored on an analysis (MODEL_OPTIONS) to a
+ * concrete model ID. Previously this arg was accepted and then ignored, so
+ * every brief silently ran on Sonnet regardless of what the user picked.
+ *
+ * Gemini used to hard-throw here ("Phase 2"). Through FreeLLMAPI it is just
+ * another upstream provider, so it now resolves normally; against Anthropic
+ * direct it falls back to the configured brief model rather than 404ing.
+ */
+function resolveBriefModel(analysisModel: string): string {
+  const requested = analysisModel?.trim();
+  if (!requested) return AGENT_CONFIG.models.brief;
+
+  if (requested.startsWith("gemini")) {
+    return llmBackend() === "freellmapi" ? requested : AGENT_CONFIG.models.brief;
+  }
+
+  // "claude-sonnet" is a UI alias, not a real model ID.
+  if (requested === "claude-sonnet") return AGENT_CONFIG.models.brief;
+  if (requested === "claude-haiku") return AGENT_CONFIG.models.detect;
+
+  return requested;
 }
 
 function parseSignalsJson(raw: string): DetectedSignal[] {
@@ -196,13 +230,58 @@ function parseSignalsJson(raw: string): DetectedSignal[] {
 
 function parseBriefJson(raw: string): { title: string; body: string } {
   const json = extractJson(raw);
-  if (!isRecord(json)) {
-    return { title: "Intelligence Update", body: raw.slice(0, 500) };
+  if (isRecord(json)) {
+    return {
+      title: String(json.title ?? "Intelligence Update").slice(0, 120),
+      body: String(json.body ?? "").slice(0, 2000),
+    };
   }
+
+  // JSON.parse failed — usually because the model was cut off at max_tokens
+  // mid-object. Salvage the fields by hand rather than dumping the raw
+  // fragment into a user-visible brief (which is what used to happen).
+  const salvaged = salvageBriefFields(raw);
+  if (salvaged) return salvaged;
+
+  return { title: "Intelligence Update", body: stripJsonNoise(raw).slice(0, 2000) };
+}
+
+/**
+ * Pulls "title" and "body" out of a partial/malformed JSON object. Handles the
+ * common truncation case where `body` opens but never closes.
+ */
+function salvageBriefFields(
+  raw: string
+): { title: string; body: string } | null {
+  const title = raw.match(/"title"\s*:\s*"((?:[^"\\]|\\.)*)"/)?.[1];
+
+  // Closed body first; fall back to an unterminated one running to end-of-string.
+  const body =
+    raw.match(/"body"\s*:\s*"((?:[^"\\]|\\.)*)"/)?.[1] ??
+    raw.match(/"body"\s*:\s*"((?:[^"\\]|\\.)*)$/)?.[1];
+
+  if (!title && !body) return null;
+
+  const unescape = (s: string) =>
+    s.replace(/\\"/g, '"').replace(/\\n/g, " ").replace(/\\\\/g, "\\").trim();
+
+  const cleanBody = body ? unescape(body) : "";
+
   return {
-    title: String(json.title ?? "Intelligence Update").slice(0, 120),
-    body: String(json.body ?? "").slice(0, 2000),
+    title: (title ? unescape(title) : "Intelligence Update").slice(0, 120),
+    // A truncated body is still useful prose, but trim a dangling partial word.
+    body: cleanBody.replace(/\s+\S*$/, "").slice(0, 2000),
   };
+}
+
+/** Last resort: strip JSON scaffolding so the fallback body reads as prose. */
+function stripJsonNoise(raw: string): string {
+  return raw
+    .replace(/```(?:json)?/gi, "")
+    .replace(/^[\s{[]+/, "")
+    .replace(/"(?:title|body)"\s*:\s*"?/gi, "")
+    .replace(/["}\]]+\s*$/, "")
+    .trim();
 }
 
 function extractJson(raw: string): unknown {

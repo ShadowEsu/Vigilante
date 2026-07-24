@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { listCompanies, getAllDashboards } from "@/lib/company/store";
+import { listCompanies, getAllDashboards, ReadOnlyStoreError } from "@/lib/company/store";
 import { onboardCompany } from "@/lib/company/company-run";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +28,10 @@ export async function POST(request: Request) {
     }
     return NextResponse.json(result);
   } catch (err) {
+    // 503 + readOnly flag so the UI can show "demo is read-only" rather than a crash.
+    if (err instanceof ReadOnlyStoreError) {
+      return NextResponse.json({ error: err.message, readOnly: true }, { status: 503 });
+    }
     const message = err instanceof Error ? err.message : "Failed to create company";
     return NextResponse.json({ error: message }, { status: 500 });
   }

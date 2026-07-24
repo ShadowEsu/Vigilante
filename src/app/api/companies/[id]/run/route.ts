@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { runCompanyScrape, rediscoverCompany } from "@/lib/company/company-run";
-import { getCompanyDashboard } from "@/lib/company/store";
+import { getCompanyDashboard, ReadOnlyStoreError } from "@/lib/company/store";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -22,6 +22,9 @@ export async function POST(
     const dashboard = await getCompanyDashboard(id);
     return NextResponse.json({ ...result, dashboard });
   } catch (err) {
+    if (err instanceof ReadOnlyStoreError) {
+      return NextResponse.json({ error: err.message, readOnly: true }, { status: 503 });
+    }
     const message = err instanceof Error ? err.message : "Scrape failed";
     return NextResponse.json({ error: message }, { status: 500 });
   }

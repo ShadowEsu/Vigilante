@@ -64,6 +64,7 @@ export type IntelHighlightCategory =
   | "transaction"
   | "leverage"
   | "corporate_action"
+  | "pricing"
   | "activity";
 
 export interface IntelHighlight {

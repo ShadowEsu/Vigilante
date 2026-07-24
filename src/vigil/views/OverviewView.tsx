@@ -393,8 +393,10 @@ export function OverviewView({ v }: { v: VigilState }) {
           {/* 06 INSIDER */}
           <div style={{ ...panel, display: wd("insider") }}>
             <SectionHead num="06" title="INSIDER INTEL" />
-            {insiderTop.map((item) => (
-              <HoverTip key={`${item.person}-${item.date}`} width={320} tip={<div>{item.note}</div>}>
+            {insiderTop.map((item, i) => (
+              // Scraped org signals frequently share a person ("—") and a date,
+              // so the composite key alone collides and React drops rows.
+              <HoverTip key={`${item.person}-${item.date}-${i}`} width={320} tip={<div>{item.note}</div>}>
                 <div style={{ padding: "15px 0", borderBottom: `1px solid ${BORDER_LIGHT}` }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
                     <span style={{ color: item.sevColor, fontSize: 11, width: 12, textAlign: "center" }}>{item.sev}</span>
@@ -455,7 +457,18 @@ export function OverviewView({ v }: { v: VigilState }) {
 
           {/* 07 LIVE TICKERS — full width */}
           <div style={{ ...panel, display: wd("stock"), gridColumn: "1 / -1", padding: "16px 28px" }}>
-            <SectionHead num="07" title="LIVE TICKERS" right={`${v.stocks.length} TRACKED`} />
+            <SectionHead
+              num="07"
+              title="LIVE TICKERS"
+              right={v.stocks.length > 0 ? `${v.stocks.length} TRACKED` : "NOT CONFIGURED"}
+            />
+            {v.stocks.length === 0 && (
+              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.32)", marginTop: 12, lineHeight: 1.7 }}>
+                No market data provider connected — ticker prices are not part of the
+                monitoring pipeline. Public-company signals still arrive via SEC EDGAR
+                filings in section 09.
+              </div>
+            )}
             <div style={{ display: "flex", gap: 0, marginTop: 12 }}>
               {v.stocks.map((s) => (
                 <button
@@ -504,8 +517,8 @@ export function OverviewView({ v }: { v: VigilState }) {
                 </div>
               ))}
             </div>
-            {newslettersTop.map((n) => (
-              <div key={`${n.name}-${n.subject}`} style={{ padding: "14px 0", borderBottom: `1px solid ${BORDER_LIGHT}` }}>
+            {newslettersTop.map((n, ni) => (
+              <div key={`${n.name}-${n.subject}-${ni}`} style={{ padding: "14px 0", borderBottom: `1px solid ${BORDER_LIGHT}` }}>
                 <div style={{ display: "flex", gap: 10, alignItems: "baseline", marginBottom: 5 }}>
                   <span style={{ flex: 1, color: "rgba(255,255,255,0.88)", fontSize: 12.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{n.name}</span>
                   <span style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", flexShrink: 0 }}>{n.ago}</span>
@@ -526,8 +539,10 @@ export function OverviewView({ v }: { v: VigilState }) {
                 <div style={{ fontSize: 9.5, letterSpacing: "0.16em", color: "rgba(255,255,255,0.38)", marginBottom: 8, paddingBottom: 6, borderBottom: `1px solid ${BORDER_LIGHT}` }}>
                   {cat.toUpperCase()}
                 </div>
-                {items.slice(0, 3).map((d) => (
-                  <div key={`${cat}-${d.title}`} style={{ padding: "10px 0", borderBottom: `1px solid rgba(255,255,255,0.04)` }}>
+                {items.slice(0, 3).map((d, i) => (
+                  // EDGAR returns many filings sharing a form type ("FORM 4"),
+                  // so category+title is not unique.
+                  <div key={`${cat}-${d.title}-${i}`} style={{ padding: "10px 0", borderBottom: `1px solid rgba(255,255,255,0.04)` }}>
                     <div style={{ fontSize: 12, color: "rgba(255,255,255,0.82)", lineHeight: 1.4, marginBottom: 4 }}>{d.title}</div>
                     <div style={{ fontSize: 10, color: "rgba(255,255,255,0.38)", display: "flex", gap: 8, flexWrap: "wrap", minWidth: 0 }}>
                       <span>{d.docType}</span>

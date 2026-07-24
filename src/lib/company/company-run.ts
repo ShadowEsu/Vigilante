@@ -7,6 +7,9 @@ import {
   isNewsletterUrl,
 } from "@/lib/agent/newsletter";
 import { generateBrief } from "@/lib/agent/llm";
+import { analyzePageChange, applyAgentAnalysis } from "@/lib/agent/agents";
+import { aiEnabled } from "@/lib/agent/llm-client";
+import { calculateCost } from "@/lib/agent/pricing";
 import { eventId } from "@/lib/integrations/events";
 import { dispatchEvent, pipelineVersion } from "@/lib/integrations/notify";
 import { buildIntelBrief, pageIntelFromScrape } from "@/lib/agent/brief-build";
@@ -114,6 +117,7 @@ export async function runCompanyScrape(
   const documentTypes = new Set<string>();
   const secForms: string[] = [];
   const intelBuffer: Omit<IntelHighlight, "id" | "company_id">[] = [];
+  const agentRuns: string[] = [];
 
   try {
     steps.push(`Starting full intel pass on ${company.domain} (${company.sources.length} sources)`);
@@ -172,8 +176,32 @@ export async function runCompanyScrape(
 
       const prev = await getSnapshot(companyId, sourceUrl);
       const prevText = prev?.raw_text ?? null;
-      const detected = detectPageChange(sourceUrl, prevText, newText, company.name);
+      let detected = detectPageChange(sourceUrl, prevText, newText, company.name);
       const nowIso = new Date().toISOString();
+
+      // Hand real diffs to the agent that owns this page. Baselines are skipped
+      // — there is nothing to compare yet, and it would burn free-tier quota on
+      // every source during onboarding.
+      if (detected && !detected.is_baseline && prevText) {
+        const analysis = await analyzePageChange({
+          sourceUrl,
+          oldText: prevText,
+          newText,
+          companyName: company.name,
+        });
+        if (analysis) {
+          detected = applyAgentAnalysis(detected, analysis);
+          agentRuns.push(analysis.agentLabel);
+          costUsd += calculateCost(
+            analysis.usage.model,
+            analysis.usage.inputTokens,
+            analysis.usage.outputTokens
+          );
+          steps.push(
+            `${analysis.agentLabel}: ${analysis.signals.length} signal(s) on ${pathLabel(sourceUrl)}`
+          );
+        }
+      }
 
       if (detected) {
         pendingChanges.push({
@@ -281,6 +309,19 @@ export async function runCompanyScrape(
     const realChanges = pendingChanges.filter((c) => !c.is_baseline).length;
     steps.push(`Analytics: ${sourcesScraped} pages snapshotted · ${realChanges} change(s) detected`);
 
+    if (agentRuns.length > 0) {
+      const byAgent = agentRuns.reduce<Record<string, number>>((acc, label) => {
+        acc[label] = (acc[label] ?? 0) + 1;
+        return acc;
+      }, {});
+      const summary = Object.entries(byAgent)
+        .map(([label, n]) => `${label} ×${n}`)
+        .join(", ");
+      steps.push(`Agents: ${summary}`);
+    } else if (realChanges > 0 && !aiEnabled()) {
+      steps.push(`Agents: skipped — no LLM backend configured`);
+    }
+
     if (reachableSources.length > 0 && reachableSources.length !== company.sources.length) {
       await updateCompany(companyId, { sources: reachableSources });
       steps.push(`Sources: pruned to ${reachableSources.length} reachable URL(s)`);
@@ -329,7 +370,7 @@ export async function runCompanyScrape(
         });
         briefGenerated = true;
         steps.push(`Brief: baseline intel summary (${sourcesScraped} sources, ${documentsFound} docs)`);
-      } else if (process.env.ANTHROPIC_API_KEY) {
+      } else if (aiEnabled()) {
         try {
           const brief = await generateBrief(changeSummaries, company.name, "claude-sonnet");
           lastBrief = { title: brief.title, body: brief.body };
@@ -341,7 +382,12 @@ export async function runCompanyScrape(
             sources: sourcesScraped,
             created_at: new Date().toISOString(),
           });
-          costUsd += 0.01;
+          // Was a flat 0.01 guess; use the real token usage so free-tier runs cost 0.
+          costUsd += calculateCost(
+            brief.usage.model,
+            brief.usage.inputTokens,
+            brief.usage.outputTokens
+          );
           briefGenerated = true;
           steps.push(`Brief: change summary generated (${realChanges} updates)`);
         } catch {

@@ -103,6 +103,14 @@ export function InsightsView({ v }: { v: VigilState }) {
           </div>
         )}
 
+        {tab === "stock" && v.stocks.length === 0 && (
+          <div style={{ fontSize: fs(13), color: "rgba(255,255,255,0.34)", lineHeight: 1.7, padding: "8px 0" }}>
+            No market data provider connected. Ticker prices are not part of the
+            monitoring pipeline — public-company signals come from SEC EDGAR filings
+            instead. See the SEC tab.
+          </div>
+        )}
+
         {tab === "stock" && (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
             {v.stocks.map((s) => (
@@ -133,9 +141,9 @@ export function InsightsView({ v }: { v: VigilState }) {
               </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {v.secFilings.map((d) => (
+                {v.secFilings.map((d, i) => (
                   <div
-                    key={`${d.title}-${d.url}`}
+                    key={`${d.title}-${d.url}-${i}`}
                     className="vigil-fade-in"
                     style={{
                       padding: "20px 24px",
@@ -160,9 +168,9 @@ export function InsightsView({ v }: { v: VigilState }) {
 
         {tab === "documents" && (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 14 }}>
-            {(v.recentDocuments.length > 0 ? v.recentDocuments : v.documents.slice(0, 8)).map((d) => (
+            {(v.recentDocuments.length > 0 ? v.recentDocuments : v.documents.slice(0, 8)).map((d, i) => (
               <div
-                key={`recent-${d.title}-${d.url}`}
+                key={`recent-${d.title}-${d.url}-${i}`}
                 className="vigil-fade-in"
                 style={{
                   padding: "20px 22px",
@@ -186,8 +194,8 @@ export function InsightsView({ v }: { v: VigilState }) {
 
         {tab === "newsletters" && (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 14 }}>
-            {v.newsletters.map((n) => (
-              <div key={`${n.name}-${n.subject}`} className="vigil-fade-in" style={{ padding: "20px 22px", border: `1px solid ${BORDER}` }}>
+            {v.newsletters.map((n, i) => (
+              <div key={`${n.name}-${n.subject}-${i}`} className="vigil-fade-in" style={{ padding: "20px 22px", border: `1px solid ${BORDER}` }}>
                 <div style={{ fontSize: fs(15), color: "rgba(255,255,255,0.9)", fontWeight: 500, marginBottom: 8 }}>{n.name}</div>
                 <div style={{ fontSize: fs(13), color: "rgba(255,255,255,0.58)", marginBottom: 10 }}>{n.subject}</div>
                 {n.url && <ExternalLink href={n.url} style={{ fontSize: fs(12) }}>{shortUrl(n.url)}</ExternalLink>}
@@ -199,9 +207,9 @@ export function InsightsView({ v }: { v: VigilState }) {
 
         {tab === "insider" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {v.insider.map((item) => (
+            {v.insider.map((item, i) => (
               <div
-                key={`${item.person}-${item.date}`}
+                key={`${item.person}-${item.date}-${i}`}
                 className="vigil-fade-in"
                 style={{
                   padding: "18px 22px",

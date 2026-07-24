@@ -19,9 +19,9 @@ export function DocumentsView({ v }: { v: VigilState }) {
         <>
           <div style={{ fontSize: 12, letterSpacing: "0.14em", color: "rgba(167,139,250,0.85)", marginBottom: 16 }}>MOST RECENT</div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 14, marginBottom: 36 }}>
-            {v.recentDocuments.map((d) => (
+            {v.recentDocuments.map((d, i) => (
               <div
-                key={`${d.title}-${d.url}`}
+                key={`${d.title}-${d.url}-${i}`}
                 className="vigil-fade-in"
                 style={{
                   padding: "22px 24px",
@@ -56,8 +56,9 @@ export function DocumentsView({ v }: { v: VigilState }) {
             <VigilBtn onClick={() => v.openSec()} accent>VIEW ALL SEC →</VigilBtn>
           </div>
           <div style={{ border: `1px solid ${BORDER}`, marginBottom: 32 }}>
-            {v.secFilings.slice(0, 5).map((d) => (
-              <div key={`sec-${d.url}`} style={{ display: "flex", gap: 16, padding: "16px 20px", borderBottom: `1px solid rgba(255,255,255,0.04)`, fontSize: 13 }}>
+            {v.secFilings.slice(0, 5).map((d, i) => (
+              // EDGAR can return the same document URL more than once.
+              <div key={`sec-${d.url}-${i}`} style={{ display: "flex", gap: 16, padding: "16px 20px", borderBottom: `1px solid rgba(255,255,255,0.04)`, fontSize: 13 }}>
                 <span style={{ color: "#A78BFA", fontSize: 11, letterSpacing: "0.08em", width: 72, flexShrink: 0 }}>{d.docType}</span>
                 <span style={{ flex: 1, color: "rgba(255,255,255,0.85)" }}>{d.title}</span>
                 {d.url && <ExternalLink href={d.url} style={{ fontSize: 11 }}>EDGAR →</ExternalLink>}
@@ -73,8 +74,8 @@ export function DocumentsView({ v }: { v: VigilState }) {
           <div style={{ fontSize: 12, letterSpacing: "0.12em", color: "rgba(255,255,255,0.5)", marginBottom: 12, paddingBottom: 8, borderBottom: `1px solid ${BORDER}` }}>
             {cat.toUpperCase()} · {items.length}
           </div>
-          {items.map((d) => (
-            <div key={`${cat}-${d.title}`} style={{ padding: "14px 0", borderBottom: "1px solid rgba(255,255,255,0.04)", fontSize: 13 }}>
+          {items.map((d, di) => (
+            <div key={`${cat}-${d.title}-${di}`} style={{ padding: "14px 0", borderBottom: "1px solid rgba(255,255,255,0.04)", fontSize: 13 }}>
               <div style={{ color: "rgba(255,255,255,0.88)", marginBottom: 6 }}>{d.title}</div>
               <div style={{ display: "flex", gap: 12, fontSize: 12, color: "rgba(255,255,255,0.38)" }}>
                 <span>{d.docType}</span>

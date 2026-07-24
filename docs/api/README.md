@@ -19,7 +19,7 @@ All JSON responses use `{ ok: true, ... }` or `{ ok: false, error, code }`.
 | POST | `/api/analyses/{id}/run` | Bearer or cookie | Run Supabase-backed analysis |
 | POST | `/api/companies` | None* | Onboard company (local demo store) |
 | POST | `/api/companies/{id}/run` | None* | Full company scrape + brief |
-| POST | `/api/ask` | None | Q&A over context (Anthropic) |
+| POST | `/api/ask` | None | Q&A over context (FreeLLMAPI / Anthropic) |
 
 \* Company routes use local filesystem storage in dev; add auth before production.
 
@@ -82,7 +82,8 @@ See `shared/API.md` for enum constants shared with Android/iOS clients.
 
 Copy `.env.example` → `.env.local`. Minimum for AI runs:
 
-- `ANTHROPIC_API_KEY`
+- `ANTHROPIC_BASE_URL` + `ANTHROPIC_AUTH_TOKEN` (FreeLLMAPI — see `NOTES.md`),
+  or `ANTHROPIC_API_KEY` for Anthropic direct. Never both.
 - `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` (auth analyses)
 - `CRON_SECRET` (scheduled runs)
 - `WEBHOOK_URL` / `VIGILANTE_SLACK_WEBHOOK_URL` (alerts)

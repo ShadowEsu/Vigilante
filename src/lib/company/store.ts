@@ -1,6 +1,9 @@
 import { createHash, randomUUID } from "crypto";
 import { promises as fs } from "fs";
 import path from "path";
+// A real scan of stripe.com and linear.app, committed so read-only deployments
+// have something genuine to show. Regenerate from .data/vigil after a fresh run.
+import seedJson from "./seed.json";
 import type {
   Company,
   CompanyBrief,
@@ -16,6 +19,32 @@ import type {
 
 const DATA_DIR = path.join(process.cwd(), ".data", "vigil");
 
+/**
+ * Serverless hosts (Vercel) expose a read-only filesystem outside /tmp, so the
+ * on-disk store cannot be written there. In that environment the app serves a
+ * committed snapshot of a real scan instead of appearing empty, and write
+ * attempts surface a clear error rather than an unhandled EROFS 500.
+ */
+// Which errno a serverless host raises for an unwritable path varies: Vercel
+// reports ENOENT for `mkdir /var/task/.data`, others give EROFS or EACCES.
+const READ_ONLY_CODES = new Set(["EROFS", "EACCES", "EPERM", "ENOENT"]);
+
+const SEED = seedJson as unknown as Record<string, unknown>;
+
+export class ReadOnlyStoreError extends Error {
+  constructor() {
+    super(
+      "This deployment is read-only — it serves a saved scan. Run Vigilante locally to add targets and trigger live scans."
+    );
+    this.name = "ReadOnlyStoreError";
+  }
+}
+
+let readOnly = false;
+export function isReadOnlyStore(): boolean {
+  return readOnly;
+}
+
 async function ensureDir() {
   await fs.mkdir(DATA_DIR, { recursive: true });
 }
@@ -24,19 +53,44 @@ function filePath(name: string) {
   return path.join(DATA_DIR, name);
 }
 
+function errCode(err: unknown): string | undefined {
+  return typeof err === "object" && err !== null && "code" in err
+    ? String((err as { code?: unknown }).code)
+    : undefined;
+}
+
 async function readJson<T>(name: string, fallback: T): Promise<T> {
-  await ensureDir();
   try {
+    await ensureDir();
     const raw = await fs.readFile(filePath(name), "utf8");
     return JSON.parse(raw) as T;
-  } catch {
+  } catch (err) {
+    if (READ_ONLY_CODES.has(errCode(err) ?? "")) readOnly = true;
+    const seeded = SEED[name];
+    if (seeded !== undefined) return seeded as T;
     return fallback;
   }
 }
 
 async function writeJson(name: string, data: unknown) {
-  await ensureDir();
-  await fs.writeFile(filePath(name), JSON.stringify(data, null, 2), "utf8");
+  // If the data directory can't even be created, the filesystem is not
+  // writable — there is no error code worth distinguishing here.
+  try {
+    await ensureDir();
+  } catch {
+    readOnly = true;
+    throw new ReadOnlyStoreError();
+  }
+
+  try {
+    await fs.writeFile(filePath(name), JSON.stringify(data, null, 2), "utf8");
+  } catch (err) {
+    if (READ_ONLY_CODES.has(errCode(err) ?? "")) {
+      readOnly = true;
+      throw new ReadOnlyStoreError();
+    }
+    throw err;
+  }
 }
 
 export async function listCompanies(): Promise<Company[]> {

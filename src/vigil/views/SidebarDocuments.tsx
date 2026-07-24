@@ -38,9 +38,9 @@ export function SidebarDocuments({ v }: { v: VigilState }) {
             Filings & investor docs appear here after indexing a target.
           </div>
         )}
-        {docs.map((d) => (
+        {docs.map((d, i) => (
           <div
-            key={`${d.title}-${d.url}`}
+            key={`${d.title}-${d.url}-${i}`}
             style={{
               padding: "10px 0",
               borderBottom: "1px solid rgba(255,255,255,0.05)",

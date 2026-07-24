@@ -97,9 +97,26 @@ Add env vars in Vercel → Settings → Environment Variables, then redeploy.
 
 ## Stack
 
-- **Next.js 14** — App Router  
+- **Next.js 15** — App Router  
 - **Supabase** — auth, waitlist, data  
-- **Anthropic / Serper** — intel pipeline (optional for demo)  
+- **FreeLLMAPI / Serper** — intel pipeline (optional for demo)  
+
+## LLM backend
+
+The intel pipeline runs on [FreeLLMAPI](https://github.com/tashfeenahmed/freellmapi),
+a self-hosted proxy that aggregates free tiers from ~28 providers behind one
+Anthropic-compatible endpoint — so no paid credits are consumed.
+
+```bash
+ANTHROPIC_BASE_URL=http://localhost:3001
+ANTHROPIC_AUTH_TOKEN=freellmapi-your-unified-key   # NOT ANTHROPIC_API_KEY
+```
+
+Anthropic direct still works — set `ANTHROPIC_API_KEY` and leave those two blank.
+Never set both; see [NOTES.md](./NOTES.md) for why, plus setup steps and the
+list of bugs fixed during the integration.
+
+Dev server runs on **port 3002**, since FreeLLMAPI owns 3001.
 
 ## Structure
 

@@ -44,6 +44,15 @@ function appBaseUrl(): string {
   return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
 }
 
+/**
+ * Cap sources fetched per scan so a run fits inside a serverless function's
+ * time budget (Vercel maxDuration). Configurable via AGENT_MAX_SCAN_SOURCES.
+ */
+function maxScanSources(): number {
+  const parsed = Number(process.env.AGENT_MAX_SCAN_SOURCES?.trim());
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 12;
+}
+
 function sourceCategory(url: string): string {
   const u = url.toLowerCase();
   if (/g2\.com|trustpilot|capterra|gartner/.test(u)) return "REVIEWS";
@@ -147,7 +156,14 @@ export async function runCompanyScrape(
       steps.push(`SEC: EDGAR lookup skipped`);
     }
 
-    for (const sourceUrl of company.sources) {
+    const scanSources = company.sources.slice(0, maxScanSources());
+    if (scanSources.length < company.sources.length) {
+      steps.push(
+        `Scan: fetching top ${scanSources.length} of ${company.sources.length} sources this pass`
+      );
+    }
+
+    for (const sourceUrl of scanSources) {
       let newText: string;
       try {
         newText = await fetchPageText(sourceUrl);

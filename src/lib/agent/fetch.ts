@@ -1,4 +1,5 @@
 import { createHash } from "crypto";
+import { BlockedUrlError, safeFetch } from "@/lib/security/ssrf";
 
 const FETCH_HEADERS = {
   "User-Agent": "Mozilla/5.0 (compatible; VigilantBot/1.0; +https://vigilant.app)",
@@ -8,11 +9,10 @@ const FETCH_HEADERS = {
 
 export async function probeUrl(url: string): Promise<boolean> {
   try {
-    const head = await fetch(url, {
+    const head = await safeFetch(url, {
       method: "HEAD",
       headers: FETCH_HEADERS,
-      signal: AbortSignal.timeout(8_000),
-      redirect: "follow",
+      timeoutMs: 8_000,
     });
     if (head.ok) return true;
     if (head.status === 405 || head.status === 403) {
@@ -21,17 +21,18 @@ export async function probeUrl(url: string): Promise<boolean> {
     if (head.status === 404 || head.status === 410) return false;
     if (head.status >= 400) return probeUrlWithGet(url);
     return true;
-  } catch {
+  } catch (err) {
+    // A blocked (SSRF) target is never "reachable" — do not retry it with GET.
+    if (err instanceof BlockedUrlError) return false;
     return probeUrlWithGet(url);
   }
 }
 
 async function probeUrlWithGet(url: string): Promise<boolean> {
   try {
-    const res = await fetch(url, {
+    const res = await safeFetch(url, {
       headers: FETCH_HEADERS,
-      signal: AbortSignal.timeout(12_000),
-      redirect: "follow",
+      timeoutMs: 12_000,
     });
     if (!res.ok) return false;
     const ct = res.headers.get("content-type") ?? "";
@@ -43,6 +44,8 @@ async function probeUrlWithGet(url: string): Promise<boolean> {
     return false;
   }
 }
+
+export { BlockedUrlError } from "@/lib/security/ssrf";
 
 /** Keep only URLs that respond — used during discovery to drop guessed 404 paths. */
 export async function filterReachableUrls(urls: string[], maxConcurrent = 6): Promise<string[]> {
@@ -62,10 +65,9 @@ export async function fetchPageText(url: string): Promise<string> {
   let lastError: Error | null = null;
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const response = await fetch(url, {
+      const response = await safeFetch(url, {
         headers: FETCH_HEADERS,
-        signal: AbortSignal.timeout(30_000),
-        redirect: "follow",
+        timeoutMs: 30_000,
       });
 
       if (!response.ok) {

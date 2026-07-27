@@ -3,6 +3,11 @@ import { listCompanies, getAllDashboards, ReadOnlyStoreError } from "@/lib/compa
 import { onboardCompany } from "@/lib/company/company-run";
 
 export const dynamic = "force-dynamic";
+// dns/net (SSRF guard), crypto, and the Supabase service client need Node APIs.
+export const runtime = "nodejs";
+// Onboarding runs discovery + a full scan in one request. 60s is the safe ceiling
+// on every Vercel plan; raise this (Pro / Fluid Compute) for very large targets.
+export const maxDuration = 60;
 
 export async function GET() {
   try {

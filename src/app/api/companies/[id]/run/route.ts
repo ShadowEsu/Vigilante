@@ -3,7 +3,10 @@ import { runCompanyScrape, rediscoverCompany } from "@/lib/company/company-run";
 import { getCompanyDashboard, ReadOnlyStoreError } from "@/lib/company/store";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 120;
+export const runtime = "nodejs";
+// 60s is the safe ceiling on every Vercel plan (Hobby caps here). Raise on
+// Pro / with Fluid Compute if scans of very large targets time out.
+export const maxDuration = 60;
 
 export async function POST(
   request: Request,
